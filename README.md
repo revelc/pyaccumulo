@@ -5,12 +5,12 @@ A python client library for Apache Accumulo
 
 Licensed under the Apache 2.0 License
 
-This is still a work in progress.
+This is still a work in progress.  Pull requests are welcome.
 
 ## Requirements
 
 1. A running Accumulo cluster
-2. The new Accumulo Thrift Proxy running
+2. The new Accumulo Thrift Proxy (https://issues.apache.org/jira/browse/ACCUMULO-482) running
 3. Thrift python lib installed
 
 ## Installation
@@ -19,6 +19,11 @@ This is still a work in progress.
     
 ## Usage Examples
 
+Run these once before running any of the examples.  Note the examples assume 
+the proxy server is running on TCP port 50096 of localhost
+
+    git clone git@github.com:accumulo/pyaccumulo.git
+    cd pyaccumulo
     export PYTHONPATH="."
     
 ### Example of simple ingest and scanning
@@ -40,5 +45,4 @@ This is still a work in progress.
 ### Example use of Regex Filter for regex based searching
 
     python examples/regex_search.py
-    
 
