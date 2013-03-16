@@ -18,7 +18,7 @@ from pyaccumulo import Accumulo, Mutation, Range
 
 table = "pythontest"
 
-conn = Accumulo()
+conn = Accumulo(host=settings.HOST, port=settings.PORT, user=settings.USER, password=settings.PASSWORD)
 
 if conn.table_exists(table):
     conn.delete_table(table)

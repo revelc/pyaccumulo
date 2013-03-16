@@ -19,11 +19,11 @@ This is still a work in progress.  Pull requests are welcome.
     
 ## Usage Examples
 
-Run these once before running any of the examples.  Note the examples assume 
-the proxy server is running on TCP port 50096 of localhost
+Run these commands once before running any of the examples.  
 
     git clone git@github.com:accumulo/pyaccumulo.git
     cd pyaccumulo
+    vi settings.py # change these settings to match your proxy HOST/PORT and USER/PASSWORD
     export PYTHONPATH="."
     
 ### Example of simple ingest and scanning

@@ -21,7 +21,7 @@ from proxy.ttypes import IteratorSetting, IteratorScope
 from util import hashcode
 import hashlib, re
 
-conn = Accumulo()
+conn = Accumulo(host=settings.HOST, port=settings.PORT, user=settings.USER, password=settings.PASSWORD)
 
 table = "regexes"
 if conn.table_exists(table):
