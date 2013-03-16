@@ -105,7 +105,7 @@ setup(
       maintainer_email = 'jason.trost AT gmail.com',
       description = 'Python client library for Apache Accumulo',
       long_description = long_description,
-      url = 'http://github.com/jt6211/pyaccumulo',
+      url = 'https://github.com/accumulo/pyaccumulo',
       keywords = 'accumulo client db distributed thrift',
       packages = ['pyaccumulo',
                   'pyaccumulo.iterators'],
