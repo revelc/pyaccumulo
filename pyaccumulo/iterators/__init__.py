@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from proxy.ttypes import IteratorSetting, IteratorScope
+from pyaccumulo.proxy.ttypes import IteratorSetting, IteratorScope
 
 class BaseIterator(object):
     """docstring for BaseIterator"""

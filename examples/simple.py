@@ -15,6 +15,7 @@
 # limitations under the License.
 
 from pyaccumulo import Accumulo, Mutation, Range
+import settings
 
 table = "pythontest"
 

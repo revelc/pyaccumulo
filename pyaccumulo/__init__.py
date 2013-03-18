@@ -19,9 +19,9 @@ from thrift.transport import TSocket
 from thrift.transport import TTransport
 from thrift.protocol import TCompactProtocol
 
-from proxy import AccumuloProxy
-from proxy.ttypes import ScanColumn, ColumnUpdate, ScanOptions, Key, BatchScanOptions, TimeType, WriterOptions, IteratorSetting
-import proxy.ttypes
+from pyaccumulo.proxy import AccumuloProxy
+from pyaccumulo.proxy.ttypes import ScanColumn, ColumnUpdate, ScanOptions, Key, BatchScanOptions, TimeType, WriterOptions, IteratorSetting
+import pyaccumulo.proxy.ttypes
 
 from collections import namedtuple
 from pyaccumulo.iterators import BaseIterator

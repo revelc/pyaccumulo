@@ -17,9 +17,10 @@
 from pyaccumulo import Accumulo, Mutation, Range
 from pyaccumulo.iterators import *
 
-from proxy.ttypes import IteratorSetting, IteratorScope
+from pyaccumulo.proxy.ttypes import IteratorSetting, IteratorScope
 from util import hashcode
 import hashlib, re
+import settings
 
 conn = Accumulo(host=settings.HOST, port=settings.PORT, user=settings.USER, password=settings.PASSWORD)
 

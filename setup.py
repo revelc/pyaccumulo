@@ -108,7 +108,9 @@ setup(
       url = 'https://github.com/accumulo/pyaccumulo',
       keywords = 'accumulo client db distributed thrift',
       packages = ['pyaccumulo',
-                  'pyaccumulo.iterators'],
+                  'pyaccumulo.iterators',
+                  'pyaccumulo.proxy'
+                  ],
       install_requires = ['thrift'],
       py_modules=['ez_setup'],
       cmdclass={"doc": doc, "rpm": rpm},
