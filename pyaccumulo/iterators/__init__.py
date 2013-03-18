@@ -42,9 +42,13 @@ class BaseCombiner(BaseIterator):
     """docstring for BaseCombiner"""
     def __init__(self, name, priority, classname, columns=[], combine_all_columns=True, encoding_type="STRING"):
         super(BaseCombiner, self).__init__(name, priority, classname)
-        self.combine_all_columns = combine_all_columns
         self.columns = columns
         self.encoding_type = encoding_type
+
+        if len(columns) == 0:
+            self.combine_all_columns = combine_all_columns
+        else:
+            self.combine_all_columns = False
 
     def add_column(self, colf, colq=None):
         self.combine_all_columns = False
