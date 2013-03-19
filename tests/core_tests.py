@@ -16,12 +16,18 @@
 
 import unittest
 
+import pyaccumulo
+from pyaccumulo import *
+
 class AccumuloTest(unittest.TestCase):
     def test_get_scan_columns(self):
-        pass
+        self.assertEquals(None, pyaccumulo._get_scan_columns([]))
+        self.assertEquals([ ScanColumn(colFamily="cf", colQualifier="cq") ], pyaccumulo._get_scan_columns([ ["cf", "cq"]]))
+        self.assertEquals([ ScanColumn(colFamily="cf", colQualifier="cq"), ScanColumn(colFamily="a") ], pyaccumulo._get_scan_columns([ ["cf", "cq"], ["a"]]))
 
     def test_following_array(self):
-        pass
+        self.assertEquals("test\0", pyaccumulo.following_array("test"))
+        self.assertEquals(None, pyaccumulo.following_array(None))
 
     def test_list_tables(self):
         pass
@@ -61,11 +67,42 @@ class AccumuloTest(unittest.TestCase):
 
 class RangeTest(unittest.TestCase):
     def test_to_range(self):
-        pass
+
+        r = Range(srow=None, erow=None)
+        rng = r.to_range()
+        self.assertEquals(None, rng.start)
+        self.assertEquals(None, rng.stop)
+
+        r = Range(srow="r01", erow="r02")
+        rng = r.to_range()
+        self.assertEquals(Key(row="r01"), rng.start)
+        self.assertEquals(Key(row="r02\0"), rng.stop)
+
+        r = Range(erow="r02", einclude=False)
+        rng = r.to_range()
+        self.assertEquals(Key(row="r02"), rng.stop)
+
+        r = Range(srow="r01", sinclude=False)
+        rng = r.to_range()
+        self.assertEquals(Key(row="r01\0"), rng.start)
+
+        r = Range(srow="r01", scf="cf1", scq="cq1", erow="r02", ecf="cf2", ecq="cq2", sts=100, ets=101, scv="xy", ecv="zx")
+        rng = r.to_range()
+        self.assertEquals(Key(row="r01", colFamily="cf1", colQualifier="cq1", timestamp=100, colVisibility="xy"), rng.start)
+        self.assertEquals(Key(row="r02\0", colFamily="cf2", colQualifier="cq2", timestamp=101, colVisibility="zx"), rng.stop)
 
 class MutationTest(unittest.TestCase):
+    def test_mutation(self):
+        m = Mutation("row1")
+        self.assertEquals("row1", m.row)
+        self.assertEquals([], m.updates)
+
     def test_put(self):
-        pass
+        m = Mutation("row1")
+        self.assertEquals([], m.updates)
+        m.put(cf="cf1", cq="cq1", cv="xy", ts=101, val="myval")
+        self.assertEquals([ColumnUpdate(colFamily="cf1", colQualifier="cq1", colVisibility="xy", timestamp=101, value="myval", deleteCell=None)], m.updates)
+
         
 class BatchWriterTest(unittest.TestCase):
     def test_init(self):

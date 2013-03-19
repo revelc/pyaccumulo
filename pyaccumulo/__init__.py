@@ -77,25 +77,19 @@ class Range(object):
 
     def to_range(self):
         r = proxy.ttypes.Range()
-
-        if self.srow:
-            r.start = Key()
-            r.start.row = self.srow if self.sinclude else following_array(self.srow)
-            r.start.colFamily = self.scf
-            r.start.colQualifier = self.scq
-            r.start.colVisibility = self.scv
-            r.start.timestamp = self.sts
         r.startInclusive = self.sinclude
-
-        if self.erow:
-            r.stop = Key()
-            r.stop.row = following_array(self.erow) if self.einclude else self.erow
-            r.stop.colFamily = self.ecf
-            r.stop.colQualifier = self.ecq
-            r.stop.colVisibility = self.ecv
-            r.stop.timestamp = self.ets
         r.stopInclusive = self.einclude
 
+        if self.srow:
+            r.start = Key(row=self.srow, colFamily=self.scf, colQualifier=self.scq, colVisibility=self.scv, timestamp=self.sts)
+            if not self.sinclude:
+                r.start.row = following_array(r.start.row)
+            
+        if self.erow:
+            r.stop = Key(row=self.erow, colFamily=self.ecf, colQualifier=self.ecq, colVisibility=self.ecv, timestamp=self.ets)
+            if self.einclude:
+                r.stop.row = following_array(r.stop.row)
+        
         return r
 
 
