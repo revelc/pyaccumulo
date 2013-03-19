@@ -18,6 +18,7 @@ import unittest
 
 import pyaccumulo
 from pyaccumulo import *
+from mock import Mock
 
 class AccumuloTest(unittest.TestCase):
     def test_get_scan_columns(self):
@@ -30,28 +31,97 @@ class AccumuloTest(unittest.TestCase):
         self.assertEquals(None, pyaccumulo.following_array(None))
 
     def test_list_tables(self):
-        pass
+        conn = Accumulo(_connect=False)
+        conn.client = Mock()
+        conn.login = "Login"
+        conn.client.listTables = Mock()
+        conn.client.listTables.return_value = set(["t1", "t2", "t3"])
+
+        res = conn.list_tables()
+        conn.client.listTables.assert_called_with("Login")
+        self.assertEquals(set(["t1", "t2", "t3"]), set(res))
+
 
     def test_table_exists(self):
-        pass
+        conn = Accumulo(_connect=False)
+        conn.client = Mock()
+        conn.login = "Login"
+        conn.client.tableExists = Mock()
+        conn.client.tableExists.return_value = True
 
-    def test_list_tables(self):
-        pass
+        res = conn.table_exists("mytable")
+        conn.client.tableExists.assert_called_with("Login", "mytable")
+        self.assertEquals(True, res)
+
 
     def test_create_table(self):
-        pass
+        conn = Accumulo(_connect=False)
+        conn.client = Mock()
+        conn.login = "Login"
+        conn.client.createTable = Mock()
+        conn.client.createTable.return_value = True
+
+        conn.create_table("mytable")
+        conn.client.createTable.assert_called_with("Login", "mytable", True, TimeType.MILLIS)        
 
     def test_delete_table(self):
-        pass
+        conn = Accumulo(_connect=False)
+        conn.client = Mock()
+        conn.login = "Login"
+        conn.client.deleteTable = Mock()
+        conn.delete_table("mytable")
+        conn.client.deleteTable.assert_called_with("Login", "mytable")
 
     def test_rename_table(self):
-        pass
+        conn = Accumulo(_connect=False)
+        conn.client = Mock()
+        conn.login = "Login"
+        conn.client.renameTable = Mock()
+        conn.rename_table("mytable", "newtable")
+        conn.client.renameTable.assert_called_with("Login", "mytable", "newtable")
 
     def test_get_range(self):
-        pass
+        conn = Accumulo(_connect=False)
+        r = Mock()
+        r.to_range = Mock()
+        r.to_range.return_value = "xyz"
+
+        res = conn._get_range(r)
+        r.to_range.assert_called_with()
+        self.assertEquals("xyz", res)
+
+        res = conn._get_range(None)
+        self.assertEquals(None, res)
 
     def test_get_ranges(self):
-        pass
+        conn = Accumulo(_connect=False)
+        r = Mock()
+        r.to_range = Mock()
+        r.to_range.return_value = "xyz"
+
+        res = conn._get_ranges([r])
+        r.to_range.assert_called_with()
+        self.assertEquals(["xyz"], res)
+
+        res = conn._get_ranges(None)
+        self.assertEquals(None, res)
+
+    def test_write(self):
+        conn = Accumulo(_connect=False)
+
+        writer = Mock()
+        writer.add_mutations = Mock()
+        writer.close = Mock()
+
+        conn.create_batch_writer = Mock(return_value=writer)
+
+        mut = Mutation("r01")
+        conn.write("mytable", mut)
+
+        conn.create_batch_writer.assert_called_with("mytable")
+        writer.add_mutations.assert_called_with([mut])
+        writer.close.assert_called_with()
+
 
     def test_scan(self):
         pass
@@ -62,8 +132,30 @@ class AccumuloTest(unittest.TestCase):
     def test_perform_scan(self):
         pass
 
-    def test_create_batch_writer(self):
-        pass
+    def test_get_iterator_settings(self):
+        conn = Accumulo(_connect=False)
+
+        res = conn._get_iterator_settings(None)
+        self.assertEquals(None, res)
+
+    def test_process_iterator(self):
+        conn = Accumulo(_connect=False)
+
+        res = conn._process_iterator(IteratorSetting(name="i1"))
+        self.assertEquals(IteratorSetting(name="i1"), res)
+
+        res = conn._process_iterator(BaseIterator(name="n1", priority=21, classname="c1"))
+        self.assertEquals(IteratorSetting(priority=21, iteratorClass='c1', name='n1', properties={}), res)
+
+        with self.assertRaises(Exception):
+            conn._process_iterator("not an iterator")
+
+    def test_close(self):
+        conn = Accumulo(_connect=False)
+        conn.transport = Mock()
+        conn.transport.close = Mock()
+        conn.close()
+        conn.transport.close.assert_called_with()
 
 class RangeTest(unittest.TestCase):
     def test_to_range(self):
@@ -106,13 +198,54 @@ class MutationTest(unittest.TestCase):
         
 class BatchWriterTest(unittest.TestCase):
     def test_init(self):
-        pass
+        conn = Accumulo(_connect=False)
+        conn.client = Mock()
+        conn.client.createWriter = Mock(return_value="writer1")
+        conn.login = "Login"
 
-    def test_add_mutations(self):
-        pass
+        b = BatchWriter(conn=conn, table="mytable", max_memory=10, latency_ms=30, timeout_ms=5, threads=11)
+        conn.client.createWriter.assert_called_with("Login", "mytable", WriterOptions(maxMemory=10, latencyMs=30, timeoutMs=5, threads=11))
 
-    def test_add_mutation(self):
-        pass
+        #-----
+
+        conn.client.update = Mock()
+        b._writer = "writer1"
+        mut = Mock(row="r01", updates=["x", "y", "z"])
+        b.add_mutation(mut)
+        conn.client.update.assert_called_with("writer1", {"r01": ["x", "y", "z"]})
+
+        # ----
+
+        conn.client.update = Mock()
+        b._writer = "writer1"
+        mut1 = Mock(row="r01", updates=["x", "y", "z"])
+        mut2 = Mock(row="r02", updates=["a", "b", "c"])
+        b.add_mutations([mut1, mut2])
+        conn.client.update.assert_called_with("writer1", {"r01": ["x", "y", "z"], "r02":["a", "b", "c"]})
+
+        # ----
+        conn.client.flush = Mock()
+        b.flush()
+        conn.client.flush.assert_called_with("writer1")
+
+        # ----
+        conn.client.closeWriter = Mock()
+        b.close()
+        conn.client.closeWriter.assert_called_with("writer1")
+        self.assertTrue(b._is_closed)
+
+        #----
+        # Writer is now closed, so...
+
+        with self.assertRaises(Exception):
+            b.add_mutation(mut)
+
+        with self.assertRaises(Exception):
+            b.add_mutations([mut1, mut2])
+
+        with self.assertRaises(Exception):
+            b.flush()
+
 
     def test_close(self):
         pass

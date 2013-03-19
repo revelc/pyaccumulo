@@ -128,13 +128,15 @@ class BatchWriter(object):
 
 class Accumulo(object):
     """ Proxy Accumulo """
-    def __init__(self, host="localhost", port=50096, user='root', password='secret'):
+    def __init__(self, host="localhost", port=50096, user='root', password='secret', _connect=True):
         super(Accumulo, self).__init__()
         self.transport = TTransport.TFramedTransport(TSocket.TSocket(host, port))
         self.protocol = TCompactProtocol.TCompactProtocol(self.transport)
         self.client = AccumuloProxy.Client(self.protocol)
-        self.transport.open()
-        self.login = self.client.login(user, {'password':password})
+
+        if _connect:
+            self.transport.open()
+            self.login = self.client.login(user, {'password':password})
 
     def close(self):
         self.transport.close()
