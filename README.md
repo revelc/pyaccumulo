@@ -83,13 +83,37 @@ Example use of Combiners for Analytics
     
     python examples/analytics.py    
 
-Example use Intersecting Iterator for search
+Example use Intersecting Iterator for search.
     
-    python examples/intersecting_iterator.py
+    # index all the files in the pyaccumulo directory
+    $ python examples/intersecting_iterator/ingest.py ii_file_search *
+    Creating table: ii_file_search
+    indexing file examples/analytics.py
+    indexing file examples/regex_search.py
+    indexing file examples/simple.py
+    indexing file examples/indexed_doc_iterator/ingest.py
+    ...
 
-Example use Document Intersecting Iterator for search
+    # Now search the "ii_file_search" table for files that contain "assert_called_with" and "assertEquals"
+    python examples/intersecting_iterator/search.py ii_file_search assert_called_with assertEquals
+    tests/core_tests.py
+    tests/iterator_tests.py
+
+Example use Document Intersecting Iterator for search.  This indexes the data in a slightly different way so the Iterator returns the document value as opposed to having to fetch it separately.
     
-    python examples/doc_search.py
+    # index all the files in the pyaccumulo directory
+    $ python examples/indexed_doc_iterator/ingest.py dociter_file_search *
+    Creating table: dociter_file_search
+    indexing file examples/analytics.py
+    indexing file examples/regex_search.py
+    indexing file examples/simple.py
+    indexing file examples/indexed_doc_iterator/ingest.py
+    ...
+
+    # Now search the "dociter_file_search" table for files that contain "hashlib" and "search_terms"
+    python examples/indexed_doc_iterator/search.py dociter_file_search hashlib search_terms
+    examples/indexed_doc_iterator/search.py
+    examples/intersecting_iterator/search.py
     
 Example use of Regex Filter for regex based searching
 

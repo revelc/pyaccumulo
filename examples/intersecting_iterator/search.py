@@ -21,40 +21,29 @@ from pyaccumulo.proxy.ttypes import IteratorSetting, IteratorScope
 from util import hashcode
 import hashlib, re
 import settings
+import sys
 
 conn = Accumulo(host=settings.HOST, port=settings.PORT, user=settings.USER, password=settings.PASSWORD)
 
-table = "search"
-if conn.table_exists(table):
-    conn.delete_table(table)
-conn.create_table(table)
+table = sys.argv[1]
+if not conn.table_exists(table):
+    print "Table '%s' does not exist."%table
+    sys.exit(1)
 
-wr = conn.create_batch_writer(table)
+search_terms = [term.lower() for term in sys.argv[2:] if len(term) > 3]
 
-license_file = "LICENSE"
-linenum = 0
-
-with file(license_file) as infile:
-    for line in infile:
-        linenum += 1
-        line = line.strip()
-        uuid = str(linenum)
-
-        m = Mutation(uuid)
-        m.put(cf="e", cq="", val=line)
-        wr.add_mutation(m)
-
-        m = Mutation("s%02d"% ((hashcode(uuid) & 0x0ffffffff)%4))
-        for tok in set(re.split('[\W]+', line.lower())):
-            m.put(tok, cq=uuid, val="")
-        wr.add_mutation(m)
-wr.close()
+if len(search_terms) < 2:
+    print "More than one term of length > 3 is required for this example"
+    sys.exit(1)
 
 uuids = []
-for e in conn.batch_scan(table, scanranges=[Range(srow="s0", erow="s1")], iterators=[IntersectingIterator(priority=21, terms=["software", "source", "code"])]):
+for e in conn.batch_scan(table, scanranges=[Range(srow="s", erow="t")], iterators=[IntersectingIterator(priority=21, terms=search_terms)]):
     uuids.append(e.cq)
 
-for doc in conn.batch_scan(table, scanranges=[Range(srow=uuid, erow=uuid) for uuid in uuids]):
-    print doc
+if len(uuids) > 0:
+    for doc in conn.batch_scan(table, scanranges=[Range(srow=uuid, erow=uuid) for uuid in uuids]):
+        print doc.val
+else:
+    print "No results found"
 
 conn.close()

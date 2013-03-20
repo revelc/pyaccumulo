@@ -21,32 +21,21 @@ from pyaccumulo.proxy.ttypes import IteratorSetting, IteratorScope
 from util import hashcode
 import hashlib, re
 import settings
+import sys
 
 conn = Accumulo(host=settings.HOST, port=settings.PORT, user=settings.USER, password=settings.PASSWORD)
 
-table = "doc_search"
-if conn.table_exists(table):
-    conn.delete_table(table)
-conn.create_table(table)
+table = sys.argv[1]
+if not conn.table_exists(table):
+    print "Table '%s' does not exist."%table
+    sys.exit(1)
 
-wr = conn.create_batch_writer(table)
+search_terms = [term.lower() for term in sys.argv[2:] if len(term) > 3]
 
-license_file = "LICENSE"
-linenum = 0
+if len(search_terms) < 2:
+    print "More than one term of length > 3 is required for this example"
+    sys.exit(1)
 
-with file(license_file) as infile:
-    for line in infile:
-        linenum += 1
-        line = line.strip()
-        uuid = str(linenum)
-
-        m = Mutation("s%02d"% ((hashcode(uuid) & 0x0ffffffff)%4))
-        m.put(cf="e\0license", cq=uuid, val=line)
-        for tok in set(re.split('[^\w.]+', line.lower())):
-            m.put(cf="i", cq="%s\0license\0%s\0info"%(tok, uuid), val="")
-        wr.add_mutation(m)
-wr.close()
-
-for e in conn.batch_scan(table, scanranges=[Range(srow="s0", erow="s1")], iterators=[IndexedDocIterator(priority=21, terms=["derived", "from"])]):
-    print e
+for e in conn.batch_scan(table, iterators=[IndexedDocIterator(priority=21, terms=search_terms)]):
+    print e.val
 conn.close()
