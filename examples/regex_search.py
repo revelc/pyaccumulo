@@ -18,7 +18,7 @@ from pyaccumulo import Accumulo, Mutation, Range
 from pyaccumulo.iterators import *
 
 from pyaccumulo.proxy.ttypes import IteratorSetting, IteratorScope
-from util import hashcode
+from examples.util import hashcode
 import hashlib, re
 
 import settings
