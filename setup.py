@@ -115,9 +115,9 @@ setup(
       py_modules=['ez_setup'],
       cmdclass={"doc": doc, "rpm": rpm},
       classifiers=[
-          'DDevelopment Status :: 3 - Alpha',
+          'Development Status :: 3 - Alpha',
           'Intended Audience :: Developers',
-          'License :: OSI Approved :: Apache 2.0',
+          'License :: OSI Approved :: Apache Software License',
           'Natural Language :: English',
           'Operating System :: OS Independent',
           'Programming Language :: Python',
