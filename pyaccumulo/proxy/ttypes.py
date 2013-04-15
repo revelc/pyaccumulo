@@ -131,49 +131,6 @@ class ScanState:
     "QUEUED": 2,
   }
 
-class CompactionType:
-  MINOR = 0
-  MERGE = 1
-  MAJOR = 2
-  FULL = 3
-
-  _VALUES_TO_NAMES = {
-    0: "MINOR",
-    1: "MERGE",
-    2: "MAJOR",
-    3: "FULL",
-  }
-
-  _NAMES_TO_VALUES = {
-    "MINOR": 0,
-    "MERGE": 1,
-    "MAJOR": 2,
-    "FULL": 3,
-  }
-
-class CompactionReason:
-  USER = 0
-  SYSTEM = 1
-  CHOP = 2
-  IDLE = 3
-  CLOSE = 4
-
-  _VALUES_TO_NAMES = {
-    0: "USER",
-    1: "SYSTEM",
-    2: "CHOP",
-    3: "IDLE",
-    4: "CLOSE",
-  }
-
-  _NAMES_TO_VALUES = {
-    "USER": 0,
-    "SYSTEM": 1,
-    "CHOP": 2,
-    "IDLE": 3,
-    "CLOSE": 4,
-  }
-
 class IteratorScope:
   MINC = 0
   MAJC = 1
@@ -1590,192 +1547,6 @@ class ActiveScan:
   def __ne__(self, other):
     return not (self == other)
 
-class ActiveCompaction:
-  """
-  Attributes:
-   - extent
-   - age
-   - inputFiles
-   - outputFile
-   - type
-   - reason
-   - localityGroup
-   - entriesRead
-   - entriesWritten
-   - iterators
-  """
-
-  thrift_spec = (
-    None, # 0
-    (1, TType.STRUCT, 'extent', (KeyExtent, KeyExtent.thrift_spec), None, ), # 1
-    (2, TType.I64, 'age', None, None, ), # 2
-    (3, TType.LIST, 'inputFiles', (TType.STRING,None), None, ), # 3
-    (4, TType.STRING, 'outputFile', None, None, ), # 4
-    (5, TType.I32, 'type', None, None, ), # 5
-    (6, TType.I32, 'reason', None, None, ), # 6
-    (7, TType.STRING, 'localityGroup', None, None, ), # 7
-    (8, TType.I64, 'entriesRead', None, None, ), # 8
-    (9, TType.I64, 'entriesWritten', None, None, ), # 9
-    (10, TType.LIST, 'iterators', (TType.STRUCT,(IteratorSetting, IteratorSetting.thrift_spec)), None, ), # 10
-  )
-
-  def __init__(self, extent=None, age=None, inputFiles=None, outputFile=None, type=None, reason=None, localityGroup=None, entriesRead=None, entriesWritten=None, iterators=None,):
-    self.extent = extent
-    self.age = age
-    self.inputFiles = inputFiles
-    self.outputFile = outputFile
-    self.type = type
-    self.reason = reason
-    self.localityGroup = localityGroup
-    self.entriesRead = entriesRead
-    self.entriesWritten = entriesWritten
-    self.iterators = iterators
-
-  def read(self, iprot):
-    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
-      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
-      return
-    iprot.readStructBegin()
-    while True:
-      (fname, ftype, fid) = iprot.readFieldBegin()
-      if ftype == TType.STOP:
-        break
-      if fid == 1:
-        if ftype == TType.STRUCT:
-          self.extent = KeyExtent()
-          self.extent.read(iprot)
-        else:
-          iprot.skip(ftype)
-      elif fid == 2:
-        if ftype == TType.I64:
-          self.age = iprot.readI64();
-        else:
-          iprot.skip(ftype)
-      elif fid == 3:
-        if ftype == TType.LIST:
-          self.inputFiles = []
-          (_etype89, _size86) = iprot.readListBegin()
-          for _i90 in xrange(_size86):
-            _elem91 = iprot.readString();
-            self.inputFiles.append(_elem91)
-          iprot.readListEnd()
-        else:
-          iprot.skip(ftype)
-      elif fid == 4:
-        if ftype == TType.STRING:
-          self.outputFile = iprot.readString();
-        else:
-          iprot.skip(ftype)
-      elif fid == 5:
-        if ftype == TType.I32:
-          self.type = iprot.readI32();
-        else:
-          iprot.skip(ftype)
-      elif fid == 6:
-        if ftype == TType.I32:
-          self.reason = iprot.readI32();
-        else:
-          iprot.skip(ftype)
-      elif fid == 7:
-        if ftype == TType.STRING:
-          self.localityGroup = iprot.readString();
-        else:
-          iprot.skip(ftype)
-      elif fid == 8:
-        if ftype == TType.I64:
-          self.entriesRead = iprot.readI64();
-        else:
-          iprot.skip(ftype)
-      elif fid == 9:
-        if ftype == TType.I64:
-          self.entriesWritten = iprot.readI64();
-        else:
-          iprot.skip(ftype)
-      elif fid == 10:
-        if ftype == TType.LIST:
-          self.iterators = []
-          (_etype95, _size92) = iprot.readListBegin()
-          for _i96 in xrange(_size92):
-            _elem97 = IteratorSetting()
-            _elem97.read(iprot)
-            self.iterators.append(_elem97)
-          iprot.readListEnd()
-        else:
-          iprot.skip(ftype)
-      else:
-        iprot.skip(ftype)
-      iprot.readFieldEnd()
-    iprot.readStructEnd()
-
-  def write(self, oprot):
-    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
-      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
-      return
-    oprot.writeStructBegin('ActiveCompaction')
-    if self.extent is not None:
-      oprot.writeFieldBegin('extent', TType.STRUCT, 1)
-      self.extent.write(oprot)
-      oprot.writeFieldEnd()
-    if self.age is not None:
-      oprot.writeFieldBegin('age', TType.I64, 2)
-      oprot.writeI64(self.age)
-      oprot.writeFieldEnd()
-    if self.inputFiles is not None:
-      oprot.writeFieldBegin('inputFiles', TType.LIST, 3)
-      oprot.writeListBegin(TType.STRING, len(self.inputFiles))
-      for iter98 in self.inputFiles:
-        oprot.writeString(iter98)
-      oprot.writeListEnd()
-      oprot.writeFieldEnd()
-    if self.outputFile is not None:
-      oprot.writeFieldBegin('outputFile', TType.STRING, 4)
-      oprot.writeString(self.outputFile)
-      oprot.writeFieldEnd()
-    if self.type is not None:
-      oprot.writeFieldBegin('type', TType.I32, 5)
-      oprot.writeI32(self.type)
-      oprot.writeFieldEnd()
-    if self.reason is not None:
-      oprot.writeFieldBegin('reason', TType.I32, 6)
-      oprot.writeI32(self.reason)
-      oprot.writeFieldEnd()
-    if self.localityGroup is not None:
-      oprot.writeFieldBegin('localityGroup', TType.STRING, 7)
-      oprot.writeString(self.localityGroup)
-      oprot.writeFieldEnd()
-    if self.entriesRead is not None:
-      oprot.writeFieldBegin('entriesRead', TType.I64, 8)
-      oprot.writeI64(self.entriesRead)
-      oprot.writeFieldEnd()
-    if self.entriesWritten is not None:
-      oprot.writeFieldBegin('entriesWritten', TType.I64, 9)
-      oprot.writeI64(self.entriesWritten)
-      oprot.writeFieldEnd()
-    if self.iterators is not None:
-      oprot.writeFieldBegin('iterators', TType.LIST, 10)
-      oprot.writeListBegin(TType.STRUCT, len(self.iterators))
-      for iter99 in self.iterators:
-        iter99.write(oprot)
-      oprot.writeListEnd()
-      oprot.writeFieldEnd()
-    oprot.writeFieldStop()
-    oprot.writeStructEnd()
-
-  def validate(self):
-    return
-
-
-  def __repr__(self):
-    L = ['%s=%r' % (key, value)
-      for key, value in self.__dict__.iteritems()]
-    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-  def __eq__(self, other):
-    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-  def __ne__(self, other):
-    return not (self == other)
-
 class WriterOptions:
   """
   Attributes:
@@ -2288,6 +2059,69 @@ class TableExistsException(TException):
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
     oprot.writeStructBegin('TableExistsException')
+    if self.msg is not None:
+      oprot.writeFieldBegin('msg', TType.STRING, 1)
+      oprot.writeString(self.msg)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __str__(self):
+    return repr(self)
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class MutationsRejectedException(TException):
+  """
+  Attributes:
+   - msg
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRING, 'msg', None, None, ), # 1
+  )
+
+  def __init__(self, msg=None,):
+    self.msg = msg
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRING:
+          self.msg = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('MutationsRejectedException')
     if self.msg is not None:
       oprot.writeFieldBegin('msg', TType.STRING, 1)
       oprot.writeString(self.msg)

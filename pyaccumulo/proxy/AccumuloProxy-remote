@@ -31,19 +31,16 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
   print '  void clearLocatorCache(string login, string tableName)'
   print '  void cloneTable(string login, string tableName, string newTableName, bool flush,  propertiesToSet,  propertiesToExclude)'
   print '  void compactTable(string login, string tableName, string startRow, string endRow,  iterators, bool flush, bool wait)'
-  print '  void cancelCompaction(string login, string tableName)'
   print '  void createTable(string login, string tableName, bool versioningIter, TimeType type)'
   print '  void deleteTable(string login, string tableName)'
   print '  void deleteRows(string login, string tableName, string startRow, string endRow)'
-  print '  void exportTable(string login, string tableName, string exportDir)'
   print '  void flushTable(string login, string tableName, string startRow, string endRow, bool wait)'
   print '   getLocalityGroups(string login, string tableName)'
   print '  IteratorSetting getIteratorSetting(string login, string tableName, string iteratorName, IteratorScope scope)'
   print '  string getMaxRow(string login, string tableName,  auths, string startRow, bool startInclusive, string endRow, bool endInclusive)'
   print '   getTableProperties(string login, string tableName)'
-  print '   getSplits(string login, string tableName, i32 maxSplits)'
   print '  void importDirectory(string login, string tableName, string importDir, string failureDir, bool setTime)'
-  print '  void importTable(string login, string tableName, string importDir)'
+  print '   listSplits(string login, string tableName, i32 maxSplits)'
   print '   listTables(string login)'
   print '   listIterators(string login, string tableName)'
   print '   listConstraints(string login, string tableName)'
@@ -59,9 +56,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
   print '   splitRangeByTablets(string login, string tableName, Range range, i32 maxSplits)'
   print '  bool tableExists(string login, string tableName)'
   print '   tableIdMap(string login)'
-  print '  void pingTabletServer(string login, string tserver)'
   print '   getActiveScans(string login, string tserver)'
-  print '   getActiveCompactions(string login, string tserver)'
   print '   getSiteConfiguration(string login)'
   print '   getSystemConfiguration(string login)'
   print '   getTabletServers(string login)'
@@ -193,12 +188,6 @@ elif cmd == 'compactTable':
     sys.exit(1)
   pp.pprint(client.compactTable(args[0],args[1],args[2],args[3],eval(args[4]),eval(args[5]),eval(args[6]),))
 
-elif cmd == 'cancelCompaction':
-  if len(args) != 2:
-    print 'cancelCompaction requires 2 args'
-    sys.exit(1)
-  pp.pprint(client.cancelCompaction(args[0],args[1],))
-
 elif cmd == 'createTable':
   if len(args) != 4:
     print 'createTable requires 4 args'
@@ -216,12 +205,6 @@ elif cmd == 'deleteRows':
     print 'deleteRows requires 4 args'
     sys.exit(1)
   pp.pprint(client.deleteRows(args[0],args[1],args[2],args[3],))
-
-elif cmd == 'exportTable':
-  if len(args) != 3:
-    print 'exportTable requires 3 args'
-    sys.exit(1)
-  pp.pprint(client.exportTable(args[0],args[1],args[2],))
 
 elif cmd == 'flushTable':
   if len(args) != 5:
@@ -253,23 +236,17 @@ elif cmd == 'getTableProperties':
     sys.exit(1)
   pp.pprint(client.getTableProperties(args[0],args[1],))
 
-elif cmd == 'getSplits':
-  if len(args) != 3:
-    print 'getSplits requires 3 args'
-    sys.exit(1)
-  pp.pprint(client.getSplits(args[0],args[1],eval(args[2]),))
-
 elif cmd == 'importDirectory':
   if len(args) != 5:
     print 'importDirectory requires 5 args'
     sys.exit(1)
   pp.pprint(client.importDirectory(args[0],args[1],args[2],args[3],eval(args[4]),))
 
-elif cmd == 'importTable':
+elif cmd == 'listSplits':
   if len(args) != 3:
-    print 'importTable requires 3 args'
+    print 'listSplits requires 3 args'
     sys.exit(1)
-  pp.pprint(client.importTable(args[0],args[1],args[2],))
+  pp.pprint(client.listSplits(args[0],args[1],eval(args[2]),))
 
 elif cmd == 'listTables':
   if len(args) != 1:
@@ -361,23 +338,11 @@ elif cmd == 'tableIdMap':
     sys.exit(1)
   pp.pprint(client.tableIdMap(args[0],))
 
-elif cmd == 'pingTabletServer':
-  if len(args) != 2:
-    print 'pingTabletServer requires 2 args'
-    sys.exit(1)
-  pp.pprint(client.pingTabletServer(args[0],args[1],))
-
 elif cmd == 'getActiveScans':
   if len(args) != 2:
     print 'getActiveScans requires 2 args'
     sys.exit(1)
   pp.pprint(client.getActiveScans(args[0],args[1],))
-
-elif cmd == 'getActiveCompactions':
-  if len(args) != 2:
-    print 'getActiveCompactions requires 2 args'
-    sys.exit(1)
-  pp.pprint(client.getActiveCompactions(args[0],args[1],))
 
 elif cmd == 'getSiteConfiguration':
   if len(args) != 1:

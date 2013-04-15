@@ -97,14 +97,6 @@ class Iface:
     """
     pass
 
-  def cancelCompaction(self, login, tableName):
-    """
-    Parameters:
-     - login
-     - tableName
-    """
-    pass
-
   def createTable(self, login, tableName, versioningIter, type):
     """
     Parameters:
@@ -130,15 +122,6 @@ class Iface:
      - tableName
      - startRow
      - endRow
-    """
-    pass
-
-  def exportTable(self, login, tableName, exportDir):
-    """
-    Parameters:
-     - login
-     - tableName
-     - exportDir
     """
     pass
 
@@ -192,15 +175,6 @@ class Iface:
     """
     pass
 
-  def getSplits(self, login, tableName, maxSplits):
-    """
-    Parameters:
-     - login
-     - tableName
-     - maxSplits
-    """
-    pass
-
   def importDirectory(self, login, tableName, importDir, failureDir, setTime):
     """
     Parameters:
@@ -212,12 +186,12 @@ class Iface:
     """
     pass
 
-  def importTable(self, login, tableName, importDir):
+  def listSplits(self, login, tableName, maxSplits):
     """
     Parameters:
      - login
      - tableName
-     - importDir
+     - maxSplits
     """
     pass
 
@@ -351,23 +325,7 @@ class Iface:
     """
     pass
 
-  def pingTabletServer(self, login, tserver):
-    """
-    Parameters:
-     - login
-     - tserver
-    """
-    pass
-
   def getActiveScans(self, login, tserver):
-    """
-    Parameters:
-     - login
-     - tserver
-    """
-    pass
-
-  def getActiveCompactions(self, login, tserver):
     """
     Parameters:
      - login
@@ -962,42 +920,6 @@ class Client(Iface):
       raise result.ouch3
     return
 
-  def cancelCompaction(self, login, tableName):
-    """
-    Parameters:
-     - login
-     - tableName
-    """
-    self.send_cancelCompaction(login, tableName)
-    self.recv_cancelCompaction()
-
-  def send_cancelCompaction(self, login, tableName):
-    self._oprot.writeMessageBegin('cancelCompaction', TMessageType.CALL, self._seqid)
-    args = cancelCompaction_args()
-    args.login = login
-    args.tableName = tableName
-    args.write(self._oprot)
-    self._oprot.writeMessageEnd()
-    self._oprot.trans.flush()
-
-  def recv_cancelCompaction(self, ):
-    (fname, mtype, rseqid) = self._iprot.readMessageBegin()
-    if mtype == TMessageType.EXCEPTION:
-      x = TApplicationException()
-      x.read(self._iprot)
-      self._iprot.readMessageEnd()
-      raise x
-    result = cancelCompaction_result()
-    result.read(self._iprot)
-    self._iprot.readMessageEnd()
-    if result.ouch1 is not None:
-      raise result.ouch1
-    if result.ouch2 is not None:
-      raise result.ouch2
-    if result.ouch3 is not None:
-      raise result.ouch3
-    return
-
   def createTable(self, login, tableName, versioningIter, type):
     """
     Parameters:
@@ -1104,44 +1026,6 @@ class Client(Iface):
       self._iprot.readMessageEnd()
       raise x
     result = deleteRows_result()
-    result.read(self._iprot)
-    self._iprot.readMessageEnd()
-    if result.ouch1 is not None:
-      raise result.ouch1
-    if result.ouch2 is not None:
-      raise result.ouch2
-    if result.ouch3 is not None:
-      raise result.ouch3
-    return
-
-  def exportTable(self, login, tableName, exportDir):
-    """
-    Parameters:
-     - login
-     - tableName
-     - exportDir
-    """
-    self.send_exportTable(login, tableName, exportDir)
-    self.recv_exportTable()
-
-  def send_exportTable(self, login, tableName, exportDir):
-    self._oprot.writeMessageBegin('exportTable', TMessageType.CALL, self._seqid)
-    args = exportTable_args()
-    args.login = login
-    args.tableName = tableName
-    args.exportDir = exportDir
-    args.write(self._oprot)
-    self._oprot.writeMessageEnd()
-    self._oprot.trans.flush()
-
-  def recv_exportTable(self, ):
-    (fname, mtype, rseqid) = self._iprot.readMessageBegin()
-    if mtype == TMessageType.EXCEPTION:
-      x = TApplicationException()
-      x.read(self._iprot)
-      self._iprot.readMessageEnd()
-      raise x
-    result = exportTable_result()
     result.read(self._iprot)
     self._iprot.readMessageEnd()
     if result.ouch1 is not None:
@@ -1354,42 +1238,6 @@ class Client(Iface):
       raise result.ouch2
     raise TApplicationException(TApplicationException.MISSING_RESULT, "getTableProperties failed: unknown result");
 
-  def getSplits(self, login, tableName, maxSplits):
-    """
-    Parameters:
-     - login
-     - tableName
-     - maxSplits
-    """
-    self.send_getSplits(login, tableName, maxSplits)
-    return self.recv_getSplits()
-
-  def send_getSplits(self, login, tableName, maxSplits):
-    self._oprot.writeMessageBegin('getSplits', TMessageType.CALL, self._seqid)
-    args = getSplits_args()
-    args.login = login
-    args.tableName = tableName
-    args.maxSplits = maxSplits
-    args.write(self._oprot)
-    self._oprot.writeMessageEnd()
-    self._oprot.trans.flush()
-
-  def recv_getSplits(self, ):
-    (fname, mtype, rseqid) = self._iprot.readMessageBegin()
-    if mtype == TMessageType.EXCEPTION:
-      x = TApplicationException()
-      x.read(self._iprot)
-      self._iprot.readMessageEnd()
-      raise x
-    result = getSplits_result()
-    result.read(self._iprot)
-    self._iprot.readMessageEnd()
-    if result.success is not None:
-      return result.success
-    if result.ouch1 is not None:
-      raise result.ouch1
-    raise TApplicationException(TApplicationException.MISSING_RESULT, "getSplits failed: unknown result");
-
   def importDirectory(self, login, tableName, importDir, failureDir, setTime):
     """
     Parameters:
@@ -1432,43 +1280,45 @@ class Client(Iface):
       raise result.ouch4
     return
 
-  def importTable(self, login, tableName, importDir):
+  def listSplits(self, login, tableName, maxSplits):
     """
     Parameters:
      - login
      - tableName
-     - importDir
+     - maxSplits
     """
-    self.send_importTable(login, tableName, importDir)
-    self.recv_importTable()
+    self.send_listSplits(login, tableName, maxSplits)
+    return self.recv_listSplits()
 
-  def send_importTable(self, login, tableName, importDir):
-    self._oprot.writeMessageBegin('importTable', TMessageType.CALL, self._seqid)
-    args = importTable_args()
+  def send_listSplits(self, login, tableName, maxSplits):
+    self._oprot.writeMessageBegin('listSplits', TMessageType.CALL, self._seqid)
+    args = listSplits_args()
     args.login = login
     args.tableName = tableName
-    args.importDir = importDir
+    args.maxSplits = maxSplits
     args.write(self._oprot)
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
 
-  def recv_importTable(self, ):
+  def recv_listSplits(self, ):
     (fname, mtype, rseqid) = self._iprot.readMessageBegin()
     if mtype == TMessageType.EXCEPTION:
       x = TApplicationException()
       x.read(self._iprot)
       self._iprot.readMessageEnd()
       raise x
-    result = importTable_result()
+    result = listSplits_result()
     result.read(self._iprot)
     self._iprot.readMessageEnd()
+    if result.success is not None:
+      return result.success
     if result.ouch1 is not None:
       raise result.ouch1
     if result.ouch2 is not None:
       raise result.ouch2
     if result.ouch3 is not None:
       raise result.ouch3
-    return
+    raise TApplicationException(TApplicationException.MISSING_RESULT, "listSplits failed: unknown result");
 
   def listTables(self, login):
     """
@@ -2018,40 +1868,6 @@ class Client(Iface):
       return result.success
     raise TApplicationException(TApplicationException.MISSING_RESULT, "tableIdMap failed: unknown result");
 
-  def pingTabletServer(self, login, tserver):
-    """
-    Parameters:
-     - login
-     - tserver
-    """
-    self.send_pingTabletServer(login, tserver)
-    self.recv_pingTabletServer()
-
-  def send_pingTabletServer(self, login, tserver):
-    self._oprot.writeMessageBegin('pingTabletServer', TMessageType.CALL, self._seqid)
-    args = pingTabletServer_args()
-    args.login = login
-    args.tserver = tserver
-    args.write(self._oprot)
-    self._oprot.writeMessageEnd()
-    self._oprot.trans.flush()
-
-  def recv_pingTabletServer(self, ):
-    (fname, mtype, rseqid) = self._iprot.readMessageBegin()
-    if mtype == TMessageType.EXCEPTION:
-      x = TApplicationException()
-      x.read(self._iprot)
-      self._iprot.readMessageEnd()
-      raise x
-    result = pingTabletServer_result()
-    result.read(self._iprot)
-    self._iprot.readMessageEnd()
-    if result.ouch1 is not None:
-      raise result.ouch1
-    if result.ouch2 is not None:
-      raise result.ouch2
-    return
-
   def getActiveScans(self, login, tserver):
     """
     Parameters:
@@ -2087,42 +1903,6 @@ class Client(Iface):
     if result.ouch2 is not None:
       raise result.ouch2
     raise TApplicationException(TApplicationException.MISSING_RESULT, "getActiveScans failed: unknown result");
-
-  def getActiveCompactions(self, login, tserver):
-    """
-    Parameters:
-     - login
-     - tserver
-    """
-    self.send_getActiveCompactions(login, tserver)
-    return self.recv_getActiveCompactions()
-
-  def send_getActiveCompactions(self, login, tserver):
-    self._oprot.writeMessageBegin('getActiveCompactions', TMessageType.CALL, self._seqid)
-    args = getActiveCompactions_args()
-    args.login = login
-    args.tserver = tserver
-    args.write(self._oprot)
-    self._oprot.writeMessageEnd()
-    self._oprot.trans.flush()
-
-  def recv_getActiveCompactions(self, ):
-    (fname, mtype, rseqid) = self._iprot.readMessageBegin()
-    if mtype == TMessageType.EXCEPTION:
-      x = TApplicationException()
-      x.read(self._iprot)
-      self._iprot.readMessageEnd()
-      raise x
-    result = getActiveCompactions_result()
-    result.read(self._iprot)
-    self._iprot.readMessageEnd()
-    if result.success is not None:
-      return result.success
-    if result.ouch1 is not None:
-      raise result.ouch1
-    if result.ouch2 is not None:
-      raise result.ouch2
-    raise TApplicationException(TApplicationException.MISSING_RESULT, "getActiveCompactions failed: unknown result");
 
   def getSiteConfiguration(self, login):
     """
@@ -2618,6 +2398,8 @@ class Client(Iface):
       raise result.ouch1
     if result.ouch2 is not None:
       raise result.ouch2
+    if result.ouch3 is not None:
+      raise result.ouch3
     return
 
   def hasSystemPermission(self, login, user, perm):
@@ -2730,6 +2512,8 @@ class Client(Iface):
       raise result.ouch1
     if result.ouch2 is not None:
       raise result.ouch2
+    if result.ouch3 is not None:
+      raise result.ouch3
     raise TApplicationException(TApplicationException.MISSING_RESULT, "listLocalUsers failed: unknown result");
 
   def revokeSystemPermission(self, login, user, perm):
@@ -2804,6 +2588,8 @@ class Client(Iface):
       raise result.ouch1
     if result.ouch2 is not None:
       raise result.ouch2
+    if result.ouch3 is not None:
+      raise result.ouch3
     return
 
   def createBatchScanner(self, login, tableName, options):
@@ -2842,6 +2628,8 @@ class Client(Iface):
       raise result.ouch1
     if result.ouch2 is not None:
       raise result.ouch2
+    if result.ouch3 is not None:
+      raise result.ouch3
     raise TApplicationException(TApplicationException.MISSING_RESULT, "createBatchScanner failed: unknown result");
 
   def createScanner(self, login, tableName, options):
@@ -2880,6 +2668,8 @@ class Client(Iface):
       raise result.ouch1
     if result.ouch2 is not None:
       raise result.ouch2
+    if result.ouch3 is not None:
+      raise result.ouch3
     raise TApplicationException(TApplicationException.MISSING_RESULT, "createScanner failed: unknown result");
 
   def hasNext(self, scanner):
@@ -3052,6 +2842,10 @@ class Client(Iface):
       raise result.outch1
     if result.ouch2 is not None:
       raise result.ouch2
+    if result.ouch3 is not None:
+      raise result.ouch3
+    if result.ouch4 is not None:
+      raise result.ouch4
     return
 
   def createWriter(self, login, tableName, opts):
@@ -3090,6 +2884,8 @@ class Client(Iface):
       raise result.outch1
     if result.ouch2 is not None:
       raise result.ouch2
+    if result.ouch3 is not None:
+      raise result.ouch3
     raise TApplicationException(TApplicationException.MISSING_RESULT, "createWriter failed: unknown result");
 
   def update(self, writer, cells):
@@ -3247,19 +3043,16 @@ class Processor(Iface, TProcessor):
     self._processMap["clearLocatorCache"] = Processor.process_clearLocatorCache
     self._processMap["cloneTable"] = Processor.process_cloneTable
     self._processMap["compactTable"] = Processor.process_compactTable
-    self._processMap["cancelCompaction"] = Processor.process_cancelCompaction
     self._processMap["createTable"] = Processor.process_createTable
     self._processMap["deleteTable"] = Processor.process_deleteTable
     self._processMap["deleteRows"] = Processor.process_deleteRows
-    self._processMap["exportTable"] = Processor.process_exportTable
     self._processMap["flushTable"] = Processor.process_flushTable
     self._processMap["getLocalityGroups"] = Processor.process_getLocalityGroups
     self._processMap["getIteratorSetting"] = Processor.process_getIteratorSetting
     self._processMap["getMaxRow"] = Processor.process_getMaxRow
     self._processMap["getTableProperties"] = Processor.process_getTableProperties
-    self._processMap["getSplits"] = Processor.process_getSplits
     self._processMap["importDirectory"] = Processor.process_importDirectory
-    self._processMap["importTable"] = Processor.process_importTable
+    self._processMap["listSplits"] = Processor.process_listSplits
     self._processMap["listTables"] = Processor.process_listTables
     self._processMap["listIterators"] = Processor.process_listIterators
     self._processMap["listConstraints"] = Processor.process_listConstraints
@@ -3275,9 +3068,7 @@ class Processor(Iface, TProcessor):
     self._processMap["splitRangeByTablets"] = Processor.process_splitRangeByTablets
     self._processMap["tableExists"] = Processor.process_tableExists
     self._processMap["tableIdMap"] = Processor.process_tableIdMap
-    self._processMap["pingTabletServer"] = Processor.process_pingTabletServer
     self._processMap["getActiveScans"] = Processor.process_getActiveScans
-    self._processMap["getActiveCompactions"] = Processor.process_getActiveCompactions
     self._processMap["getSiteConfiguration"] = Processor.process_getSiteConfiguration
     self._processMap["getSystemConfiguration"] = Processor.process_getSystemConfiguration
     self._processMap["getTabletServers"] = Processor.process_getTabletServers
@@ -3365,11 +3156,11 @@ class Processor(Iface, TProcessor):
     result = addSplits_result()
     try:
       self._handler.addSplits(args.login, args.tableName, args.splits)
-    except TableNotFoundException as ouch1:
+    except AccumuloException as ouch1:
       result.ouch1 = ouch1
-    except AccumuloException as ouch2:
+    except AccumuloSecurityException as ouch2:
       result.ouch2 = ouch2
-    except AccumuloSecurityException as ouch3:
+    except TableNotFoundException as ouch3:
       result.ouch3 = ouch3
     oprot.writeMessageBegin("addSplits", TMessageType.REPLY, seqid)
     result.write(oprot)
@@ -3462,24 +3253,6 @@ class Processor(Iface, TProcessor):
     oprot.writeMessageEnd()
     oprot.trans.flush()
 
-  def process_cancelCompaction(self, seqid, iprot, oprot):
-    args = cancelCompaction_args()
-    args.read(iprot)
-    iprot.readMessageEnd()
-    result = cancelCompaction_result()
-    try:
-      self._handler.cancelCompaction(args.login, args.tableName)
-    except AccumuloSecurityException as ouch1:
-      result.ouch1 = ouch1
-    except TableNotFoundException as ouch2:
-      result.ouch2 = ouch2
-    except AccumuloException as ouch3:
-      result.ouch3 = ouch3
-    oprot.writeMessageBegin("cancelCompaction", TMessageType.REPLY, seqid)
-    result.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
   def process_createTable(self, seqid, iprot, oprot):
     args = createTable_args()
     args.read(iprot)
@@ -3534,24 +3307,6 @@ class Processor(Iface, TProcessor):
     oprot.writeMessageEnd()
     oprot.trans.flush()
 
-  def process_exportTable(self, seqid, iprot, oprot):
-    args = exportTable_args()
-    args.read(iprot)
-    iprot.readMessageEnd()
-    result = exportTable_result()
-    try:
-      self._handler.exportTable(args.login, args.tableName, args.exportDir)
-    except TableNotFoundException as ouch1:
-      result.ouch1 = ouch1
-    except AccumuloException as ouch2:
-      result.ouch2 = ouch2
-    except AccumuloSecurityException as ouch3:
-      result.ouch3 = ouch3
-    oprot.writeMessageBegin("exportTable", TMessageType.REPLY, seqid)
-    result.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
   def process_flushTable(self, seqid, iprot, oprot):
     args = flushTable_args()
     args.read(iprot)
@@ -3591,9 +3346,9 @@ class Processor(Iface, TProcessor):
     result = getIteratorSetting_result()
     try:
       result.success = self._handler.getIteratorSetting(args.login, args.tableName, args.iteratorName, args.scope)
-    except AccumuloSecurityException as ouch1:
+    except AccumuloException as ouch1:
       result.ouch1 = ouch1
-    except AccumuloException as ouch2:
+    except AccumuloSecurityException as ouch2:
       result.ouch2 = ouch2
     except TableNotFoundException as ouch3:
       result.ouch3 = ouch3
@@ -3609,11 +3364,11 @@ class Processor(Iface, TProcessor):
     result = getMaxRow_result()
     try:
       result.success = self._handler.getMaxRow(args.login, args.tableName, args.auths, args.startRow, args.startInclusive, args.endRow, args.endInclusive)
-    except TableNotFoundException as ouch1:
+    except AccumuloException as ouch1:
       result.ouch1 = ouch1
-    except AccumuloException as ouch2:
+    except AccumuloSecurityException as ouch2:
       result.ouch2 = ouch2
-    except AccumuloSecurityException as ouch3:
+    except TableNotFoundException as ouch3:
       result.ouch3 = ouch3
     oprot.writeMessageBegin("getMaxRow", TMessageType.REPLY, seqid)
     result.write(oprot)
@@ -3636,20 +3391,6 @@ class Processor(Iface, TProcessor):
     oprot.writeMessageEnd()
     oprot.trans.flush()
 
-  def process_getSplits(self, seqid, iprot, oprot):
-    args = getSplits_args()
-    args.read(iprot)
-    iprot.readMessageEnd()
-    result = getSplits_result()
-    try:
-      result.success = self._handler.getSplits(args.login, args.tableName, args.maxSplits)
-    except TableNotFoundException as ouch1:
-      result.ouch1 = ouch1
-    oprot.writeMessageBegin("getSplits", TMessageType.REPLY, seqid)
-    result.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
   def process_importDirectory(self, seqid, iprot, oprot):
     args = importDirectory_args()
     args.read(iprot)
@@ -3668,20 +3409,20 @@ class Processor(Iface, TProcessor):
     oprot.writeMessageEnd()
     oprot.trans.flush()
 
-  def process_importTable(self, seqid, iprot, oprot):
-    args = importTable_args()
+  def process_listSplits(self, seqid, iprot, oprot):
+    args = listSplits_args()
     args.read(iprot)
     iprot.readMessageEnd()
-    result = importTable_result()
+    result = listSplits_result()
     try:
-      self._handler.importTable(args.login, args.tableName, args.importDir)
-    except TableExistsException as ouch1:
+      result.success = self._handler.listSplits(args.login, args.tableName, args.maxSplits)
+    except AccumuloException as ouch1:
       result.ouch1 = ouch1
-    except AccumuloException as ouch2:
+    except AccumuloSecurityException as ouch2:
       result.ouch2 = ouch2
-    except AccumuloSecurityException as ouch3:
+    except TableNotFoundException as ouch3:
       result.ouch3 = ouch3
-    oprot.writeMessageBegin("importTable", TMessageType.REPLY, seqid)
+    oprot.writeMessageBegin("listSplits", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
     oprot.trans.flush()
@@ -3704,9 +3445,9 @@ class Processor(Iface, TProcessor):
     result = listIterators_result()
     try:
       result.success = self._handler.listIterators(args.login, args.tableName)
-    except AccumuloSecurityException as ouch1:
+    except AccumuloException as ouch1:
       result.ouch1 = ouch1
-    except AccumuloException as ouch2:
+    except AccumuloSecurityException as ouch2:
       result.ouch2 = ouch2
     except TableNotFoundException as ouch3:
       result.ouch3 = ouch3
@@ -3756,9 +3497,9 @@ class Processor(Iface, TProcessor):
     result = offlineTable_result()
     try:
       self._handler.offlineTable(args.login, args.tableName)
-    except AccumuloSecurityException as ouch1:
+    except AccumuloException as ouch1:
       result.ouch1 = ouch1
-    except AccumuloException as ouch2:
+    except AccumuloSecurityException as ouch2:
       result.ouch2 = ouch2
     except TableNotFoundException as ouch3:
       result.ouch3 = ouch3
@@ -3774,9 +3515,9 @@ class Processor(Iface, TProcessor):
     result = onlineTable_result()
     try:
       self._handler.onlineTable(args.login, args.tableName)
-    except AccumuloSecurityException as ouch1:
+    except AccumuloException as ouch1:
       result.ouch1 = ouch1
-    except AccumuloException as ouch2:
+    except AccumuloSecurityException as ouch2:
       result.ouch2 = ouch2
     except TableNotFoundException as ouch3:
       result.ouch3 = ouch3
@@ -3808,9 +3549,9 @@ class Processor(Iface, TProcessor):
     result = removeIterator_result()
     try:
       self._handler.removeIterator(args.login, args.tableName, args.iterName, args.scopes)
-    except AccumuloSecurityException as ouch1:
+    except AccumuloException as ouch1:
       result.ouch1 = ouch1
-    except AccumuloException as ouch2:
+    except AccumuloSecurityException as ouch2:
       result.ouch2 = ouch2
     except TableNotFoundException as ouch3:
       result.ouch3 = ouch3
@@ -3842,11 +3583,11 @@ class Processor(Iface, TProcessor):
     result = renameTable_result()
     try:
       self._handler.renameTable(args.login, args.oldTableName, args.newTableName)
-    except AccumuloSecurityException as ouch1:
+    except AccumuloException as ouch1:
       result.ouch1 = ouch1
-    except TableNotFoundException as ouch2:
+    except AccumuloSecurityException as ouch2:
       result.ouch2 = ouch2
-    except AccumuloException as ouch3:
+    except TableNotFoundException as ouch3:
       result.ouch3 = ouch3
     except TableExistsException as ouch4:
       result.ouch4 = ouch4
@@ -3929,22 +3670,6 @@ class Processor(Iface, TProcessor):
     oprot.writeMessageEnd()
     oprot.trans.flush()
 
-  def process_pingTabletServer(self, seqid, iprot, oprot):
-    args = pingTabletServer_args()
-    args.read(iprot)
-    iprot.readMessageEnd()
-    result = pingTabletServer_result()
-    try:
-      self._handler.pingTabletServer(args.login, args.tserver)
-    except AccumuloException as ouch1:
-      result.ouch1 = ouch1
-    except AccumuloSecurityException as ouch2:
-      result.ouch2 = ouch2
-    oprot.writeMessageBegin("pingTabletServer", TMessageType.REPLY, seqid)
-    result.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
   def process_getActiveScans(self, seqid, iprot, oprot):
     args = getActiveScans_args()
     args.read(iprot)
@@ -3957,22 +3682,6 @@ class Processor(Iface, TProcessor):
     except AccumuloSecurityException as ouch2:
       result.ouch2 = ouch2
     oprot.writeMessageBegin("getActiveScans", TMessageType.REPLY, seqid)
-    result.write(oprot)
-    oprot.writeMessageEnd()
-    oprot.trans.flush()
-
-  def process_getActiveCompactions(self, seqid, iprot, oprot):
-    args = getActiveCompactions_args()
-    args.read(iprot)
-    iprot.readMessageEnd()
-    result = getActiveCompactions_result()
-    try:
-      result.success = self._handler.getActiveCompactions(args.login, args.tserver)
-    except AccumuloException as ouch1:
-      result.ouch1 = ouch1
-    except AccumuloSecurityException as ouch2:
-      result.ouch2 = ouch2
-    oprot.writeMessageBegin("getActiveCompactions", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
     oprot.trans.flush()
@@ -4191,6 +3900,8 @@ class Processor(Iface, TProcessor):
       result.ouch1 = ouch1
     except AccumuloSecurityException as ouch2:
       result.ouch2 = ouch2
+    except TableNotFoundException as ouch3:
+      result.ouch3 = ouch3
     oprot.writeMessageBegin("grantTablePermission", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
@@ -4239,6 +3950,8 @@ class Processor(Iface, TProcessor):
       result.ouch1 = ouch1
     except AccumuloSecurityException as ouch2:
       result.ouch2 = ouch2
+    except TableNotFoundException as ouch3:
+      result.ouch3 = ouch3
     oprot.writeMessageBegin("listLocalUsers", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
@@ -4271,6 +3984,8 @@ class Processor(Iface, TProcessor):
       result.ouch1 = ouch1
     except AccumuloSecurityException as ouch2:
       result.ouch2 = ouch2
+    except TableNotFoundException as ouch3:
+      result.ouch3 = ouch3
     oprot.writeMessageBegin("revokeTablePermission", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
@@ -4287,6 +4002,8 @@ class Processor(Iface, TProcessor):
       result.ouch1 = ouch1
     except AccumuloSecurityException as ouch2:
       result.ouch2 = ouch2
+    except TableNotFoundException as ouch3:
+      result.ouch3 = ouch3
     oprot.writeMessageBegin("createBatchScanner", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
@@ -4303,6 +4020,8 @@ class Processor(Iface, TProcessor):
       result.ouch1 = ouch1
     except AccumuloSecurityException as ouch2:
       result.ouch2 = ouch2
+    except TableNotFoundException as ouch3:
+      result.ouch3 = ouch3
     oprot.writeMessageBegin("createScanner", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
@@ -4383,6 +4102,10 @@ class Processor(Iface, TProcessor):
       result.outch1 = outch1
     except AccumuloSecurityException as ouch2:
       result.ouch2 = ouch2
+    except TableNotFoundException as ouch3:
+      result.ouch3 = ouch3
+    except MutationsRejectedException as ouch4:
+      result.ouch4 = ouch4
     oprot.writeMessageBegin("updateAndFlush", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
@@ -4399,6 +4122,8 @@ class Processor(Iface, TProcessor):
       result.outch1 = outch1
     except AccumuloSecurityException as ouch2:
       result.ouch2 = ouch2
+    except TableNotFoundException as ouch3:
+      result.ouch3 = ouch3
     oprot.writeMessageBegin("createWriter", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
@@ -4420,7 +4145,7 @@ class Processor(Iface, TProcessor):
       self._handler.flush(args.writer)
     except UnknownWriter as ouch1:
       result.ouch1 = ouch1
-    except AccumuloSecurityException as ouch2:
+    except MutationsRejectedException as ouch2:
       result.ouch2 = ouch2
     oprot.writeMessageBegin("flush", TMessageType.REPLY, seqid)
     result.write(oprot)
@@ -4436,7 +4161,7 @@ class Processor(Iface, TProcessor):
       self._handler.closeWriter(args.writer)
     except UnknownWriter as ouch1:
       result.ouch1 = ouch1
-    except AccumuloSecurityException as ouch2:
+    except MutationsRejectedException as ouch2:
       result.ouch2 = ouch2
     oprot.writeMessageBegin("closeWriter", TMessageType.REPLY, seqid)
     result.write(oprot)
@@ -4502,11 +4227,11 @@ class login_args:
       elif fid == 2:
         if ftype == TType.MAP:
           self.loginProperties = {}
-          (_ktype101, _vtype102, _size100 ) = iprot.readMapBegin() 
-          for _i104 in xrange(_size100):
-            _key105 = iprot.readString();
-            _val106 = iprot.readString();
-            self.loginProperties[_key105] = _val106
+          (_ktype87, _vtype88, _size86 ) = iprot.readMapBegin() 
+          for _i90 in xrange(_size86):
+            _key91 = iprot.readString();
+            _val92 = iprot.readString();
+            self.loginProperties[_key91] = _val92
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -4527,9 +4252,9 @@ class login_args:
     if self.loginProperties is not None:
       oprot.writeFieldBegin('loginProperties', TType.MAP, 2)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.loginProperties))
-      for kiter107,viter108 in self.loginProperties.items():
-        oprot.writeString(kiter107)
-        oprot.writeString(viter108)
+      for kiter93,viter94 in self.loginProperties.items():
+        oprot.writeString(kiter93)
+        oprot.writeString(viter94)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -4846,10 +4571,10 @@ class addSplits_args:
       elif fid == 3:
         if ftype == TType.SET:
           self.splits = set()
-          (_etype112, _size109) = iprot.readSetBegin()
-          for _i113 in xrange(_size109):
-            _elem114 = iprot.readString();
-            self.splits.add(_elem114)
+          (_etype98, _size95) = iprot.readSetBegin()
+          for _i99 in xrange(_size95):
+            _elem100 = iprot.readString();
+            self.splits.add(_elem100)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
@@ -4874,8 +4599,8 @@ class addSplits_args:
     if self.splits is not None:
       oprot.writeFieldBegin('splits', TType.SET, 3)
       oprot.writeSetBegin(TType.STRING, len(self.splits))
-      for iter115 in self.splits:
-        oprot.writeString(iter115)
+      for iter101 in self.splits:
+        oprot.writeString(iter101)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -4906,9 +4631,9 @@ class addSplits_result:
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRUCT, 'ouch1', (TableNotFoundException, TableNotFoundException.thrift_spec), None, ), # 1
-    (2, TType.STRUCT, 'ouch2', (AccumuloException, AccumuloException.thrift_spec), None, ), # 2
-    (3, TType.STRUCT, 'ouch3', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 3
+    (1, TType.STRUCT, 'ouch1', (AccumuloException, AccumuloException.thrift_spec), None, ), # 1
+    (2, TType.STRUCT, 'ouch2', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 2
+    (3, TType.STRUCT, 'ouch3', (TableNotFoundException, TableNotFoundException.thrift_spec), None, ), # 3
   )
 
   def __init__(self, ouch1=None, ouch2=None, ouch3=None,):
@@ -4927,19 +4652,19 @@ class addSplits_result:
         break
       if fid == 1:
         if ftype == TType.STRUCT:
-          self.ouch1 = TableNotFoundException()
+          self.ouch1 = AccumuloException()
           self.ouch1.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 2:
         if ftype == TType.STRUCT:
-          self.ouch2 = AccumuloException()
+          self.ouch2 = AccumuloSecurityException()
           self.ouch2.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 3:
         if ftype == TType.STRUCT:
-          self.ouch3 = AccumuloSecurityException()
+          self.ouch3 = TableNotFoundException()
           self.ouch3.read(iprot)
         else:
           iprot.skip(ftype)
@@ -5034,10 +4759,10 @@ class attachIterator_args:
       elif fid == 4:
         if ftype == TType.SET:
           self.scopes = set()
-          (_etype119, _size116) = iprot.readSetBegin()
-          for _i120 in xrange(_size116):
-            _elem121 = iprot.readI32();
-            self.scopes.add(_elem121)
+          (_etype105, _size102) = iprot.readSetBegin()
+          for _i106 in xrange(_size102):
+            _elem107 = iprot.readI32();
+            self.scopes.add(_elem107)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
@@ -5066,8 +4791,8 @@ class attachIterator_args:
     if self.scopes is not None:
       oprot.writeFieldBegin('scopes', TType.SET, 4)
       oprot.writeSetBegin(TType.I32, len(self.scopes))
-      for iter122 in self.scopes:
-        oprot.writeI32(iter122)
+      for iter108 in self.scopes:
+        oprot.writeI32(iter108)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -5226,10 +4951,10 @@ class checkIteratorConflicts_args:
       elif fid == 4:
         if ftype == TType.SET:
           self.scopes = set()
-          (_etype126, _size123) = iprot.readSetBegin()
-          for _i127 in xrange(_size123):
-            _elem128 = iprot.readI32();
-            self.scopes.add(_elem128)
+          (_etype112, _size109) = iprot.readSetBegin()
+          for _i113 in xrange(_size109):
+            _elem114 = iprot.readI32();
+            self.scopes.add(_elem114)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
@@ -5258,8 +4983,8 @@ class checkIteratorConflicts_args:
     if self.scopes is not None:
       oprot.writeFieldBegin('scopes', TType.SET, 4)
       oprot.writeSetBegin(TType.I32, len(self.scopes))
-      for iter129 in self.scopes:
-        oprot.writeI32(iter129)
+      for iter115 in self.scopes:
+        oprot.writeI32(iter115)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -5548,21 +5273,21 @@ class cloneTable_args:
       elif fid == 5:
         if ftype == TType.MAP:
           self.propertiesToSet = {}
-          (_ktype131, _vtype132, _size130 ) = iprot.readMapBegin() 
-          for _i134 in xrange(_size130):
-            _key135 = iprot.readString();
-            _val136 = iprot.readString();
-            self.propertiesToSet[_key135] = _val136
+          (_ktype117, _vtype118, _size116 ) = iprot.readMapBegin() 
+          for _i120 in xrange(_size116):
+            _key121 = iprot.readString();
+            _val122 = iprot.readString();
+            self.propertiesToSet[_key121] = _val122
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
       elif fid == 6:
         if ftype == TType.SET:
           self.propertiesToExclude = set()
-          (_etype140, _size137) = iprot.readSetBegin()
-          for _i141 in xrange(_size137):
-            _elem142 = iprot.readString();
-            self.propertiesToExclude.add(_elem142)
+          (_etype126, _size123) = iprot.readSetBegin()
+          for _i127 in xrange(_size123):
+            _elem128 = iprot.readString();
+            self.propertiesToExclude.add(_elem128)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
@@ -5595,16 +5320,16 @@ class cloneTable_args:
     if self.propertiesToSet is not None:
       oprot.writeFieldBegin('propertiesToSet', TType.MAP, 5)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.propertiesToSet))
-      for kiter143,viter144 in self.propertiesToSet.items():
-        oprot.writeString(kiter143)
-        oprot.writeString(viter144)
+      for kiter129,viter130 in self.propertiesToSet.items():
+        oprot.writeString(kiter129)
+        oprot.writeString(viter130)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.propertiesToExclude is not None:
       oprot.writeFieldBegin('propertiesToExclude', TType.SET, 6)
       oprot.writeSetBegin(TType.STRING, len(self.propertiesToExclude))
-      for iter145 in self.propertiesToExclude:
-        oprot.writeString(iter145)
+      for iter131 in self.propertiesToExclude:
+        oprot.writeString(iter131)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -5789,11 +5514,11 @@ class compactTable_args:
       elif fid == 5:
         if ftype == TType.LIST:
           self.iterators = []
-          (_etype149, _size146) = iprot.readListBegin()
-          for _i150 in xrange(_size146):
-            _elem151 = IteratorSetting()
-            _elem151.read(iprot)
-            self.iterators.append(_elem151)
+          (_etype135, _size132) = iprot.readListBegin()
+          for _i136 in xrange(_size132):
+            _elem137 = IteratorSetting()
+            _elem137.read(iprot)
+            self.iterators.append(_elem137)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -5836,8 +5561,8 @@ class compactTable_args:
     if self.iterators is not None:
       oprot.writeFieldBegin('iterators', TType.LIST, 5)
       oprot.writeListBegin(TType.STRUCT, len(self.iterators))
-      for iter152 in self.iterators:
-        iter152.write(oprot)
+      for iter138 in self.iterators:
+        iter138.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.flush is not None:
@@ -5923,165 +5648,6 @@ class compactTable_result:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
     oprot.writeStructBegin('compactTable_result')
-    if self.ouch1 is not None:
-      oprot.writeFieldBegin('ouch1', TType.STRUCT, 1)
-      self.ouch1.write(oprot)
-      oprot.writeFieldEnd()
-    if self.ouch2 is not None:
-      oprot.writeFieldBegin('ouch2', TType.STRUCT, 2)
-      self.ouch2.write(oprot)
-      oprot.writeFieldEnd()
-    if self.ouch3 is not None:
-      oprot.writeFieldBegin('ouch3', TType.STRUCT, 3)
-      self.ouch3.write(oprot)
-      oprot.writeFieldEnd()
-    oprot.writeFieldStop()
-    oprot.writeStructEnd()
-
-  def validate(self):
-    return
-
-
-  def __repr__(self):
-    L = ['%s=%r' % (key, value)
-      for key, value in self.__dict__.iteritems()]
-    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-  def __eq__(self, other):
-    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-  def __ne__(self, other):
-    return not (self == other)
-
-class cancelCompaction_args:
-  """
-  Attributes:
-   - login
-   - tableName
-  """
-
-  thrift_spec = (
-    None, # 0
-    (1, TType.STRING, 'login', None, None, ), # 1
-    (2, TType.STRING, 'tableName', None, None, ), # 2
-  )
-
-  def __init__(self, login=None, tableName=None,):
-    self.login = login
-    self.tableName = tableName
-
-  def read(self, iprot):
-    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
-      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
-      return
-    iprot.readStructBegin()
-    while True:
-      (fname, ftype, fid) = iprot.readFieldBegin()
-      if ftype == TType.STOP:
-        break
-      if fid == 1:
-        if ftype == TType.STRING:
-          self.login = iprot.readString();
-        else:
-          iprot.skip(ftype)
-      elif fid == 2:
-        if ftype == TType.STRING:
-          self.tableName = iprot.readString();
-        else:
-          iprot.skip(ftype)
-      else:
-        iprot.skip(ftype)
-      iprot.readFieldEnd()
-    iprot.readStructEnd()
-
-  def write(self, oprot):
-    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
-      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
-      return
-    oprot.writeStructBegin('cancelCompaction_args')
-    if self.login is not None:
-      oprot.writeFieldBegin('login', TType.STRING, 1)
-      oprot.writeString(self.login)
-      oprot.writeFieldEnd()
-    if self.tableName is not None:
-      oprot.writeFieldBegin('tableName', TType.STRING, 2)
-      oprot.writeString(self.tableName)
-      oprot.writeFieldEnd()
-    oprot.writeFieldStop()
-    oprot.writeStructEnd()
-
-  def validate(self):
-    return
-
-
-  def __repr__(self):
-    L = ['%s=%r' % (key, value)
-      for key, value in self.__dict__.iteritems()]
-    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-  def __eq__(self, other):
-    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-  def __ne__(self, other):
-    return not (self == other)
-
-class cancelCompaction_result:
-  """
-  Attributes:
-   - ouch1
-   - ouch2
-   - ouch3
-  """
-
-  thrift_spec = (
-    None, # 0
-    (1, TType.STRUCT, 'ouch1', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 1
-    (2, TType.STRUCT, 'ouch2', (TableNotFoundException, TableNotFoundException.thrift_spec), None, ), # 2
-    (3, TType.STRUCT, 'ouch3', (AccumuloException, AccumuloException.thrift_spec), None, ), # 3
-  )
-
-  def __init__(self, ouch1=None, ouch2=None, ouch3=None,):
-    self.ouch1 = ouch1
-    self.ouch2 = ouch2
-    self.ouch3 = ouch3
-
-  def read(self, iprot):
-    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
-      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
-      return
-    iprot.readStructBegin()
-    while True:
-      (fname, ftype, fid) = iprot.readFieldBegin()
-      if ftype == TType.STOP:
-        break
-      if fid == 1:
-        if ftype == TType.STRUCT:
-          self.ouch1 = AccumuloSecurityException()
-          self.ouch1.read(iprot)
-        else:
-          iprot.skip(ftype)
-      elif fid == 2:
-        if ftype == TType.STRUCT:
-          self.ouch2 = TableNotFoundException()
-          self.ouch2.read(iprot)
-        else:
-          iprot.skip(ftype)
-      elif fid == 3:
-        if ftype == TType.STRUCT:
-          self.ouch3 = AccumuloException()
-          self.ouch3.read(iprot)
-        else:
-          iprot.skip(ftype)
-      else:
-        iprot.skip(ftype)
-      iprot.readFieldEnd()
-    iprot.readStructEnd()
-
-  def write(self, oprot):
-    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
-      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
-      return
-    oprot.writeStructBegin('cancelCompaction_result')
     if self.ouch1 is not None:
       oprot.writeFieldBegin('ouch1', TType.STRUCT, 1)
       self.ouch1.write(oprot)
@@ -6637,177 +6203,6 @@ class deleteRows_result:
   def __ne__(self, other):
     return not (self == other)
 
-class exportTable_args:
-  """
-  Attributes:
-   - login
-   - tableName
-   - exportDir
-  """
-
-  thrift_spec = (
-    None, # 0
-    (1, TType.STRING, 'login', None, None, ), # 1
-    (2, TType.STRING, 'tableName', None, None, ), # 2
-    (3, TType.STRING, 'exportDir', None, None, ), # 3
-  )
-
-  def __init__(self, login=None, tableName=None, exportDir=None,):
-    self.login = login
-    self.tableName = tableName
-    self.exportDir = exportDir
-
-  def read(self, iprot):
-    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
-      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
-      return
-    iprot.readStructBegin()
-    while True:
-      (fname, ftype, fid) = iprot.readFieldBegin()
-      if ftype == TType.STOP:
-        break
-      if fid == 1:
-        if ftype == TType.STRING:
-          self.login = iprot.readString();
-        else:
-          iprot.skip(ftype)
-      elif fid == 2:
-        if ftype == TType.STRING:
-          self.tableName = iprot.readString();
-        else:
-          iprot.skip(ftype)
-      elif fid == 3:
-        if ftype == TType.STRING:
-          self.exportDir = iprot.readString();
-        else:
-          iprot.skip(ftype)
-      else:
-        iprot.skip(ftype)
-      iprot.readFieldEnd()
-    iprot.readStructEnd()
-
-  def write(self, oprot):
-    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
-      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
-      return
-    oprot.writeStructBegin('exportTable_args')
-    if self.login is not None:
-      oprot.writeFieldBegin('login', TType.STRING, 1)
-      oprot.writeString(self.login)
-      oprot.writeFieldEnd()
-    if self.tableName is not None:
-      oprot.writeFieldBegin('tableName', TType.STRING, 2)
-      oprot.writeString(self.tableName)
-      oprot.writeFieldEnd()
-    if self.exportDir is not None:
-      oprot.writeFieldBegin('exportDir', TType.STRING, 3)
-      oprot.writeString(self.exportDir)
-      oprot.writeFieldEnd()
-    oprot.writeFieldStop()
-    oprot.writeStructEnd()
-
-  def validate(self):
-    return
-
-
-  def __repr__(self):
-    L = ['%s=%r' % (key, value)
-      for key, value in self.__dict__.iteritems()]
-    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-  def __eq__(self, other):
-    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-  def __ne__(self, other):
-    return not (self == other)
-
-class exportTable_result:
-  """
-  Attributes:
-   - ouch1
-   - ouch2
-   - ouch3
-  """
-
-  thrift_spec = (
-    None, # 0
-    (1, TType.STRUCT, 'ouch1', (TableNotFoundException, TableNotFoundException.thrift_spec), None, ), # 1
-    (2, TType.STRUCT, 'ouch2', (AccumuloException, AccumuloException.thrift_spec), None, ), # 2
-    (3, TType.STRUCT, 'ouch3', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 3
-  )
-
-  def __init__(self, ouch1=None, ouch2=None, ouch3=None,):
-    self.ouch1 = ouch1
-    self.ouch2 = ouch2
-    self.ouch3 = ouch3
-
-  def read(self, iprot):
-    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
-      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
-      return
-    iprot.readStructBegin()
-    while True:
-      (fname, ftype, fid) = iprot.readFieldBegin()
-      if ftype == TType.STOP:
-        break
-      if fid == 1:
-        if ftype == TType.STRUCT:
-          self.ouch1 = TableNotFoundException()
-          self.ouch1.read(iprot)
-        else:
-          iprot.skip(ftype)
-      elif fid == 2:
-        if ftype == TType.STRUCT:
-          self.ouch2 = AccumuloException()
-          self.ouch2.read(iprot)
-        else:
-          iprot.skip(ftype)
-      elif fid == 3:
-        if ftype == TType.STRUCT:
-          self.ouch3 = AccumuloSecurityException()
-          self.ouch3.read(iprot)
-        else:
-          iprot.skip(ftype)
-      else:
-        iprot.skip(ftype)
-      iprot.readFieldEnd()
-    iprot.readStructEnd()
-
-  def write(self, oprot):
-    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
-      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
-      return
-    oprot.writeStructBegin('exportTable_result')
-    if self.ouch1 is not None:
-      oprot.writeFieldBegin('ouch1', TType.STRUCT, 1)
-      self.ouch1.write(oprot)
-      oprot.writeFieldEnd()
-    if self.ouch2 is not None:
-      oprot.writeFieldBegin('ouch2', TType.STRUCT, 2)
-      self.ouch2.write(oprot)
-      oprot.writeFieldEnd()
-    if self.ouch3 is not None:
-      oprot.writeFieldBegin('ouch3', TType.STRUCT, 3)
-      self.ouch3.write(oprot)
-      oprot.writeFieldEnd()
-    oprot.writeFieldStop()
-    oprot.writeStructEnd()
-
-  def validate(self):
-    return
-
-
-  def __repr__(self):
-    L = ['%s=%r' % (key, value)
-      for key, value in self.__dict__.iteritems()]
-    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-  def __eq__(self, other):
-    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-  def __ne__(self, other):
-    return not (self == other)
-
 class flushTable_args:
   """
   Attributes:
@@ -7093,16 +6488,16 @@ class getLocalityGroups_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype154, _vtype155, _size153 ) = iprot.readMapBegin() 
-          for _i157 in xrange(_size153):
-            _key158 = iprot.readString();
-            _val159 = set()
-            (_etype163, _size160) = iprot.readSetBegin()
-            for _i164 in xrange(_size160):
-              _elem165 = iprot.readString();
-              _val159.add(_elem165)
+          (_ktype140, _vtype141, _size139 ) = iprot.readMapBegin() 
+          for _i143 in xrange(_size139):
+            _key144 = iprot.readString();
+            _val145 = set()
+            (_etype149, _size146) = iprot.readSetBegin()
+            for _i150 in xrange(_size146):
+              _elem151 = iprot.readString();
+              _val145.add(_elem151)
             iprot.readSetEnd()
-            self.success[_key158] = _val159
+            self.success[_key144] = _val145
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -7131,11 +6526,11 @@ class getLocalityGroups_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.SET, len(self.success))
-      for kiter166,viter167 in self.success.items():
-        oprot.writeString(kiter166)
-        oprot.writeSetBegin(TType.STRING, len(viter167))
-        for iter168 in viter167:
-          oprot.writeString(iter168)
+      for kiter152,viter153 in self.success.items():
+        oprot.writeString(kiter152)
+        oprot.writeSetBegin(TType.STRING, len(viter153))
+        for iter154 in viter153:
+          oprot.writeString(iter154)
         oprot.writeSetEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
@@ -7272,8 +6667,8 @@ class getIteratorSetting_result:
 
   thrift_spec = (
     (0, TType.STRUCT, 'success', (IteratorSetting, IteratorSetting.thrift_spec), None, ), # 0
-    (1, TType.STRUCT, 'ouch1', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 1
-    (2, TType.STRUCT, 'ouch2', (AccumuloException, AccumuloException.thrift_spec), None, ), # 2
+    (1, TType.STRUCT, 'ouch1', (AccumuloException, AccumuloException.thrift_spec), None, ), # 1
+    (2, TType.STRUCT, 'ouch2', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 2
     (3, TType.STRUCT, 'ouch3', (TableNotFoundException, TableNotFoundException.thrift_spec), None, ), # 3
   )
 
@@ -7300,13 +6695,13 @@ class getIteratorSetting_result:
           iprot.skip(ftype)
       elif fid == 1:
         if ftype == TType.STRUCT:
-          self.ouch1 = AccumuloSecurityException()
+          self.ouch1 = AccumuloException()
           self.ouch1.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 2:
         if ftype == TType.STRUCT:
-          self.ouch2 = AccumuloException()
+          self.ouch2 = AccumuloSecurityException()
           self.ouch2.read(iprot)
         else:
           iprot.skip(ftype)
@@ -7414,10 +6809,10 @@ class getMaxRow_args:
       elif fid == 3:
         if ftype == TType.SET:
           self.auths = set()
-          (_etype172, _size169) = iprot.readSetBegin()
-          for _i173 in xrange(_size169):
-            _elem174 = iprot.readString();
-            self.auths.add(_elem174)
+          (_etype158, _size155) = iprot.readSetBegin()
+          for _i159 in xrange(_size155):
+            _elem160 = iprot.readString();
+            self.auths.add(_elem160)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
@@ -7462,8 +6857,8 @@ class getMaxRow_args:
     if self.auths is not None:
       oprot.writeFieldBegin('auths', TType.SET, 3)
       oprot.writeSetBegin(TType.STRING, len(self.auths))
-      for iter175 in self.auths:
-        oprot.writeString(iter175)
+      for iter161 in self.auths:
+        oprot.writeString(iter161)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     if self.startRow is not None:
@@ -7511,9 +6906,9 @@ class getMaxRow_result:
 
   thrift_spec = (
     (0, TType.STRING, 'success', None, None, ), # 0
-    (1, TType.STRUCT, 'ouch1', (TableNotFoundException, TableNotFoundException.thrift_spec), None, ), # 1
-    (2, TType.STRUCT, 'ouch2', (AccumuloException, AccumuloException.thrift_spec), None, ), # 2
-    (3, TType.STRUCT, 'ouch3', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 3
+    (1, TType.STRUCT, 'ouch1', (AccumuloException, AccumuloException.thrift_spec), None, ), # 1
+    (2, TType.STRUCT, 'ouch2', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 2
+    (3, TType.STRUCT, 'ouch3', (TableNotFoundException, TableNotFoundException.thrift_spec), None, ), # 3
   )
 
   def __init__(self, success=None, ouch1=None, ouch2=None, ouch3=None,):
@@ -7538,19 +6933,19 @@ class getMaxRow_result:
           iprot.skip(ftype)
       elif fid == 1:
         if ftype == TType.STRUCT:
-          self.ouch1 = TableNotFoundException()
+          self.ouch1 = AccumuloException()
           self.ouch1.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 2:
         if ftype == TType.STRUCT:
-          self.ouch2 = AccumuloException()
+          self.ouch2 = AccumuloSecurityException()
           self.ouch2.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 3:
         if ftype == TType.STRUCT:
-          self.ouch3 = AccumuloSecurityException()
+          self.ouch3 = TableNotFoundException()
           self.ouch3.read(iprot)
         else:
           iprot.skip(ftype)
@@ -7701,11 +7096,11 @@ class getTableProperties_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype177, _vtype178, _size176 ) = iprot.readMapBegin() 
-          for _i180 in xrange(_size176):
-            _key181 = iprot.readString();
-            _val182 = iprot.readString();
-            self.success[_key181] = _val182
+          (_ktype163, _vtype164, _size162 ) = iprot.readMapBegin() 
+          for _i166 in xrange(_size162):
+            _key167 = iprot.readString();
+            _val168 = iprot.readString();
+            self.success[_key167] = _val168
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -7734,9 +7129,9 @@ class getTableProperties_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.success))
-      for kiter183,viter184 in self.success.items():
-        oprot.writeString(kiter183)
-        oprot.writeString(viter184)
+      for kiter169,viter170 in self.success.items():
+        oprot.writeString(kiter169)
+        oprot.writeString(viter170)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.ouch1 is not None:
@@ -7746,170 +7141,6 @@ class getTableProperties_result:
     if self.ouch2 is not None:
       oprot.writeFieldBegin('ouch2', TType.STRUCT, 2)
       self.ouch2.write(oprot)
-      oprot.writeFieldEnd()
-    oprot.writeFieldStop()
-    oprot.writeStructEnd()
-
-  def validate(self):
-    return
-
-
-  def __repr__(self):
-    L = ['%s=%r' % (key, value)
-      for key, value in self.__dict__.iteritems()]
-    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-  def __eq__(self, other):
-    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-  def __ne__(self, other):
-    return not (self == other)
-
-class getSplits_args:
-  """
-  Attributes:
-   - login
-   - tableName
-   - maxSplits
-  """
-
-  thrift_spec = (
-    None, # 0
-    (1, TType.STRING, 'login', None, None, ), # 1
-    (2, TType.STRING, 'tableName', None, None, ), # 2
-    (3, TType.I32, 'maxSplits', None, None, ), # 3
-  )
-
-  def __init__(self, login=None, tableName=None, maxSplits=None,):
-    self.login = login
-    self.tableName = tableName
-    self.maxSplits = maxSplits
-
-  def read(self, iprot):
-    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
-      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
-      return
-    iprot.readStructBegin()
-    while True:
-      (fname, ftype, fid) = iprot.readFieldBegin()
-      if ftype == TType.STOP:
-        break
-      if fid == 1:
-        if ftype == TType.STRING:
-          self.login = iprot.readString();
-        else:
-          iprot.skip(ftype)
-      elif fid == 2:
-        if ftype == TType.STRING:
-          self.tableName = iprot.readString();
-        else:
-          iprot.skip(ftype)
-      elif fid == 3:
-        if ftype == TType.I32:
-          self.maxSplits = iprot.readI32();
-        else:
-          iprot.skip(ftype)
-      else:
-        iprot.skip(ftype)
-      iprot.readFieldEnd()
-    iprot.readStructEnd()
-
-  def write(self, oprot):
-    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
-      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
-      return
-    oprot.writeStructBegin('getSplits_args')
-    if self.login is not None:
-      oprot.writeFieldBegin('login', TType.STRING, 1)
-      oprot.writeString(self.login)
-      oprot.writeFieldEnd()
-    if self.tableName is not None:
-      oprot.writeFieldBegin('tableName', TType.STRING, 2)
-      oprot.writeString(self.tableName)
-      oprot.writeFieldEnd()
-    if self.maxSplits is not None:
-      oprot.writeFieldBegin('maxSplits', TType.I32, 3)
-      oprot.writeI32(self.maxSplits)
-      oprot.writeFieldEnd()
-    oprot.writeFieldStop()
-    oprot.writeStructEnd()
-
-  def validate(self):
-    return
-
-
-  def __repr__(self):
-    L = ['%s=%r' % (key, value)
-      for key, value in self.__dict__.iteritems()]
-    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-  def __eq__(self, other):
-    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-  def __ne__(self, other):
-    return not (self == other)
-
-class getSplits_result:
-  """
-  Attributes:
-   - success
-   - ouch1
-  """
-
-  thrift_spec = (
-    (0, TType.LIST, 'success', (TType.STRING,None), None, ), # 0
-    (1, TType.STRUCT, 'ouch1', (TableNotFoundException, TableNotFoundException.thrift_spec), None, ), # 1
-  )
-
-  def __init__(self, success=None, ouch1=None,):
-    self.success = success
-    self.ouch1 = ouch1
-
-  def read(self, iprot):
-    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
-      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
-      return
-    iprot.readStructBegin()
-    while True:
-      (fname, ftype, fid) = iprot.readFieldBegin()
-      if ftype == TType.STOP:
-        break
-      if fid == 0:
-        if ftype == TType.LIST:
-          self.success = []
-          (_etype188, _size185) = iprot.readListBegin()
-          for _i189 in xrange(_size185):
-            _elem190 = iprot.readString();
-            self.success.append(_elem190)
-          iprot.readListEnd()
-        else:
-          iprot.skip(ftype)
-      elif fid == 1:
-        if ftype == TType.STRUCT:
-          self.ouch1 = TableNotFoundException()
-          self.ouch1.read(iprot)
-        else:
-          iprot.skip(ftype)
-      else:
-        iprot.skip(ftype)
-      iprot.readFieldEnd()
-    iprot.readStructEnd()
-
-  def write(self, oprot):
-    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
-      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
-      return
-    oprot.writeStructBegin('getSplits_result')
-    if self.success is not None:
-      oprot.writeFieldBegin('success', TType.LIST, 0)
-      oprot.writeListBegin(TType.STRING, len(self.success))
-      for iter191 in self.success:
-        oprot.writeString(iter191)
-      oprot.writeListEnd()
-      oprot.writeFieldEnd()
-    if self.ouch1 is not None:
-      oprot.writeFieldBegin('ouch1', TType.STRUCT, 1)
-      self.ouch1.write(oprot)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -8124,25 +7355,25 @@ class importDirectory_result:
   def __ne__(self, other):
     return not (self == other)
 
-class importTable_args:
+class listSplits_args:
   """
   Attributes:
    - login
    - tableName
-   - importDir
+   - maxSplits
   """
 
   thrift_spec = (
     None, # 0
     (1, TType.STRING, 'login', None, None, ), # 1
     (2, TType.STRING, 'tableName', None, None, ), # 2
-    (3, TType.STRING, 'importDir', None, None, ), # 3
+    (3, TType.I32, 'maxSplits', None, None, ), # 3
   )
 
-  def __init__(self, login=None, tableName=None, importDir=None,):
+  def __init__(self, login=None, tableName=None, maxSplits=None,):
     self.login = login
     self.tableName = tableName
-    self.importDir = importDir
+    self.maxSplits = maxSplits
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -8164,8 +7395,8 @@ class importTable_args:
         else:
           iprot.skip(ftype)
       elif fid == 3:
-        if ftype == TType.STRING:
-          self.importDir = iprot.readString();
+        if ftype == TType.I32:
+          self.maxSplits = iprot.readI32();
         else:
           iprot.skip(ftype)
       else:
@@ -8177,7 +7408,7 @@ class importTable_args:
     if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
-    oprot.writeStructBegin('importTable_args')
+    oprot.writeStructBegin('listSplits_args')
     if self.login is not None:
       oprot.writeFieldBegin('login', TType.STRING, 1)
       oprot.writeString(self.login)
@@ -8186,9 +7417,9 @@ class importTable_args:
       oprot.writeFieldBegin('tableName', TType.STRING, 2)
       oprot.writeString(self.tableName)
       oprot.writeFieldEnd()
-    if self.importDir is not None:
-      oprot.writeFieldBegin('importDir', TType.STRING, 3)
-      oprot.writeString(self.importDir)
+    if self.maxSplits is not None:
+      oprot.writeFieldBegin('maxSplits', TType.I32, 3)
+      oprot.writeI32(self.maxSplits)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -8208,22 +7439,24 @@ class importTable_args:
   def __ne__(self, other):
     return not (self == other)
 
-class importTable_result:
+class listSplits_result:
   """
   Attributes:
+   - success
    - ouch1
    - ouch2
    - ouch3
   """
 
   thrift_spec = (
-    None, # 0
-    (1, TType.STRUCT, 'ouch1', (TableExistsException, TableExistsException.thrift_spec), None, ), # 1
-    (2, TType.STRUCT, 'ouch2', (AccumuloException, AccumuloException.thrift_spec), None, ), # 2
-    (3, TType.STRUCT, 'ouch3', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 3
+    (0, TType.LIST, 'success', (TType.STRING,None), None, ), # 0
+    (1, TType.STRUCT, 'ouch1', (AccumuloException, AccumuloException.thrift_spec), None, ), # 1
+    (2, TType.STRUCT, 'ouch2', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 2
+    (3, TType.STRUCT, 'ouch3', (TableNotFoundException, TableNotFoundException.thrift_spec), None, ), # 3
   )
 
-  def __init__(self, ouch1=None, ouch2=None, ouch3=None,):
+  def __init__(self, success=None, ouch1=None, ouch2=None, ouch3=None,):
+    self.success = success
     self.ouch1 = ouch1
     self.ouch2 = ouch2
     self.ouch3 = ouch3
@@ -8237,21 +7470,31 @@ class importTable_result:
       (fname, ftype, fid) = iprot.readFieldBegin()
       if ftype == TType.STOP:
         break
-      if fid == 1:
+      if fid == 0:
+        if ftype == TType.LIST:
+          self.success = []
+          (_etype174, _size171) = iprot.readListBegin()
+          for _i175 in xrange(_size171):
+            _elem176 = iprot.readString();
+            self.success.append(_elem176)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 1:
         if ftype == TType.STRUCT:
-          self.ouch1 = TableExistsException()
+          self.ouch1 = AccumuloException()
           self.ouch1.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 2:
         if ftype == TType.STRUCT:
-          self.ouch2 = AccumuloException()
+          self.ouch2 = AccumuloSecurityException()
           self.ouch2.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 3:
         if ftype == TType.STRUCT:
-          self.ouch3 = AccumuloSecurityException()
+          self.ouch3 = TableNotFoundException()
           self.ouch3.read(iprot)
         else:
           iprot.skip(ftype)
@@ -8264,7 +7507,14 @@ class importTable_result:
     if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
-    oprot.writeStructBegin('importTable_result')
+    oprot.writeStructBegin('listSplits_result')
+    if self.success is not None:
+      oprot.writeFieldBegin('success', TType.LIST, 0)
+      oprot.writeListBegin(TType.STRING, len(self.success))
+      for iter177 in self.success:
+        oprot.writeString(iter177)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
     if self.ouch1 is not None:
       oprot.writeFieldBegin('ouch1', TType.STRUCT, 1)
       self.ouch1.write(oprot)
@@ -8380,10 +7630,10 @@ class listTables_result:
       if fid == 0:
         if ftype == TType.SET:
           self.success = set()
-          (_etype195, _size192) = iprot.readSetBegin()
-          for _i196 in xrange(_size192):
-            _elem197 = iprot.readString();
-            self.success.add(_elem197)
+          (_etype181, _size178) = iprot.readSetBegin()
+          for _i182 in xrange(_size178):
+            _elem183 = iprot.readString();
+            self.success.add(_elem183)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
@@ -8400,8 +7650,8 @@ class listTables_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.SET, 0)
       oprot.writeSetBegin(TType.STRING, len(self.success))
-      for iter198 in self.success:
-        oprot.writeString(iter198)
+      for iter184 in self.success:
+        oprot.writeString(iter184)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -8505,8 +7755,8 @@ class listIterators_result:
 
   thrift_spec = (
     (0, TType.MAP, 'success', (TType.STRING,None,TType.SET,(TType.I32,None)), None, ), # 0
-    (1, TType.STRUCT, 'ouch1', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 1
-    (2, TType.STRUCT, 'ouch2', (AccumuloException, AccumuloException.thrift_spec), None, ), # 2
+    (1, TType.STRUCT, 'ouch1', (AccumuloException, AccumuloException.thrift_spec), None, ), # 1
+    (2, TType.STRUCT, 'ouch2', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 2
     (3, TType.STRUCT, 'ouch3', (TableNotFoundException, TableNotFoundException.thrift_spec), None, ), # 3
   )
 
@@ -8528,28 +7778,28 @@ class listIterators_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype200, _vtype201, _size199 ) = iprot.readMapBegin() 
-          for _i203 in xrange(_size199):
-            _key204 = iprot.readString();
-            _val205 = set()
-            (_etype209, _size206) = iprot.readSetBegin()
-            for _i210 in xrange(_size206):
-              _elem211 = iprot.readI32();
-              _val205.add(_elem211)
+          (_ktype186, _vtype187, _size185 ) = iprot.readMapBegin() 
+          for _i189 in xrange(_size185):
+            _key190 = iprot.readString();
+            _val191 = set()
+            (_etype195, _size192) = iprot.readSetBegin()
+            for _i196 in xrange(_size192):
+              _elem197 = iprot.readI32();
+              _val191.add(_elem197)
             iprot.readSetEnd()
-            self.success[_key204] = _val205
+            self.success[_key190] = _val191
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
       elif fid == 1:
         if ftype == TType.STRUCT:
-          self.ouch1 = AccumuloSecurityException()
+          self.ouch1 = AccumuloException()
           self.ouch1.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 2:
         if ftype == TType.STRUCT:
-          self.ouch2 = AccumuloException()
+          self.ouch2 = AccumuloSecurityException()
           self.ouch2.read(iprot)
         else:
           iprot.skip(ftype)
@@ -8572,11 +7822,11 @@ class listIterators_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.SET, len(self.success))
-      for kiter212,viter213 in self.success.items():
-        oprot.writeString(kiter212)
-        oprot.writeSetBegin(TType.I32, len(viter213))
-        for iter214 in viter213:
-          oprot.writeI32(iter214)
+      for kiter198,viter199 in self.success.items():
+        oprot.writeString(kiter198)
+        oprot.writeSetBegin(TType.I32, len(viter199))
+        for iter200 in viter199:
+          oprot.writeI32(iter200)
         oprot.writeSetEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
@@ -8713,11 +7963,11 @@ class listConstraints_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype216, _vtype217, _size215 ) = iprot.readMapBegin() 
-          for _i219 in xrange(_size215):
-            _key220 = iprot.readString();
-            _val221 = iprot.readI32();
-            self.success[_key220] = _val221
+          (_ktype202, _vtype203, _size201 ) = iprot.readMapBegin() 
+          for _i205 in xrange(_size201):
+            _key206 = iprot.readString();
+            _val207 = iprot.readI32();
+            self.success[_key206] = _val207
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -8746,9 +7996,9 @@ class listConstraints_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.I32, len(self.success))
-      for kiter222,viter223 in self.success.items():
-        oprot.writeString(kiter222)
-        oprot.writeI32(viter223)
+      for kiter208,viter209 in self.success.items():
+        oprot.writeString(kiter208)
+        oprot.writeI32(viter209)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.ouch1 is not None:
@@ -9042,8 +8292,8 @@ class offlineTable_result:
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRUCT, 'ouch1', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 1
-    (2, TType.STRUCT, 'ouch2', (AccumuloException, AccumuloException.thrift_spec), None, ), # 2
+    (1, TType.STRUCT, 'ouch1', (AccumuloException, AccumuloException.thrift_spec), None, ), # 1
+    (2, TType.STRUCT, 'ouch2', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 2
     (3, TType.STRUCT, 'ouch3', (TableNotFoundException, TableNotFoundException.thrift_spec), None, ), # 3
   )
 
@@ -9063,13 +8313,13 @@ class offlineTable_result:
         break
       if fid == 1:
         if ftype == TType.STRUCT:
-          self.ouch1 = AccumuloSecurityException()
+          self.ouch1 = AccumuloException()
           self.ouch1.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 2:
         if ftype == TType.STRUCT:
-          self.ouch2 = AccumuloException()
+          self.ouch2 = AccumuloSecurityException()
           self.ouch2.read(iprot)
         else:
           iprot.skip(ftype)
@@ -9201,8 +8451,8 @@ class onlineTable_result:
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRUCT, 'ouch1', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 1
-    (2, TType.STRUCT, 'ouch2', (AccumuloException, AccumuloException.thrift_spec), None, ), # 2
+    (1, TType.STRUCT, 'ouch1', (AccumuloException, AccumuloException.thrift_spec), None, ), # 1
+    (2, TType.STRUCT, 'ouch2', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 2
     (3, TType.STRUCT, 'ouch3', (TableNotFoundException, TableNotFoundException.thrift_spec), None, ), # 3
   )
 
@@ -9222,13 +8472,13 @@ class onlineTable_result:
         break
       if fid == 1:
         if ftype == TType.STRUCT:
-          self.ouch1 = AccumuloSecurityException()
+          self.ouch1 = AccumuloException()
           self.ouch1.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 2:
         if ftype == TType.STRUCT:
-          self.ouch2 = AccumuloException()
+          self.ouch2 = AccumuloSecurityException()
           self.ouch2.read(iprot)
         else:
           iprot.skip(ftype)
@@ -9486,10 +8736,10 @@ class removeIterator_args:
       elif fid == 4:
         if ftype == TType.SET:
           self.scopes = set()
-          (_etype227, _size224) = iprot.readSetBegin()
-          for _i228 in xrange(_size224):
-            _elem229 = iprot.readI32();
-            self.scopes.add(_elem229)
+          (_etype213, _size210) = iprot.readSetBegin()
+          for _i214 in xrange(_size210):
+            _elem215 = iprot.readI32();
+            self.scopes.add(_elem215)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
@@ -9518,8 +8768,8 @@ class removeIterator_args:
     if self.scopes is not None:
       oprot.writeFieldBegin('scopes', TType.SET, 4)
       oprot.writeSetBegin(TType.I32, len(self.scopes))
-      for iter230 in self.scopes:
-        oprot.writeI32(iter230)
+      for iter216 in self.scopes:
+        oprot.writeI32(iter216)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -9550,8 +8800,8 @@ class removeIterator_result:
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRUCT, 'ouch1', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 1
-    (2, TType.STRUCT, 'ouch2', (AccumuloException, AccumuloException.thrift_spec), None, ), # 2
+    (1, TType.STRUCT, 'ouch1', (AccumuloException, AccumuloException.thrift_spec), None, ), # 1
+    (2, TType.STRUCT, 'ouch2', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 2
     (3, TType.STRUCT, 'ouch3', (TableNotFoundException, TableNotFoundException.thrift_spec), None, ), # 3
   )
 
@@ -9571,13 +8821,13 @@ class removeIterator_result:
         break
       if fid == 1:
         if ftype == TType.STRUCT:
-          self.ouch1 = AccumuloSecurityException()
+          self.ouch1 = AccumuloException()
           self.ouch1.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 2:
         if ftype == TType.STRUCT:
-          self.ouch2 = AccumuloException()
+          self.ouch2 = AccumuloSecurityException()
           self.ouch2.read(iprot)
         else:
           iprot.skip(ftype)
@@ -9880,9 +9130,9 @@ class renameTable_result:
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRUCT, 'ouch1', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 1
-    (2, TType.STRUCT, 'ouch2', (TableNotFoundException, TableNotFoundException.thrift_spec), None, ), # 2
-    (3, TType.STRUCT, 'ouch3', (AccumuloException, AccumuloException.thrift_spec), None, ), # 3
+    (1, TType.STRUCT, 'ouch1', (AccumuloException, AccumuloException.thrift_spec), None, ), # 1
+    (2, TType.STRUCT, 'ouch2', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 2
+    (3, TType.STRUCT, 'ouch3', (TableNotFoundException, TableNotFoundException.thrift_spec), None, ), # 3
     (4, TType.STRUCT, 'ouch4', (TableExistsException, TableExistsException.thrift_spec), None, ), # 4
   )
 
@@ -9903,19 +9153,19 @@ class renameTable_result:
         break
       if fid == 1:
         if ftype == TType.STRUCT:
-          self.ouch1 = AccumuloSecurityException()
+          self.ouch1 = AccumuloException()
           self.ouch1.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 2:
         if ftype == TType.STRUCT:
-          self.ouch2 = TableNotFoundException()
+          self.ouch2 = AccumuloSecurityException()
           self.ouch2.read(iprot)
         else:
           iprot.skip(ftype)
       elif fid == 3:
         if ftype == TType.STRUCT:
-          self.ouch3 = AccumuloException()
+          self.ouch3 = TableNotFoundException()
           self.ouch3.read(iprot)
         else:
           iprot.skip(ftype)
@@ -10011,16 +9261,16 @@ class setLocalityGroups_args:
       elif fid == 3:
         if ftype == TType.MAP:
           self.groups = {}
-          (_ktype232, _vtype233, _size231 ) = iprot.readMapBegin() 
-          for _i235 in xrange(_size231):
-            _key236 = iprot.readString();
-            _val237 = set()
-            (_etype241, _size238) = iprot.readSetBegin()
-            for _i242 in xrange(_size238):
-              _elem243 = iprot.readString();
-              _val237.add(_elem243)
+          (_ktype218, _vtype219, _size217 ) = iprot.readMapBegin() 
+          for _i221 in xrange(_size217):
+            _key222 = iprot.readString();
+            _val223 = set()
+            (_etype227, _size224) = iprot.readSetBegin()
+            for _i228 in xrange(_size224):
+              _elem229 = iprot.readString();
+              _val223.add(_elem229)
             iprot.readSetEnd()
-            self.groups[_key236] = _val237
+            self.groups[_key222] = _val223
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -10045,11 +9295,11 @@ class setLocalityGroups_args:
     if self.groups is not None:
       oprot.writeFieldBegin('groups', TType.MAP, 3)
       oprot.writeMapBegin(TType.STRING, TType.SET, len(self.groups))
-      for kiter244,viter245 in self.groups.items():
-        oprot.writeString(kiter244)
-        oprot.writeSetBegin(TType.STRING, len(viter245))
-        for iter246 in viter245:
-          oprot.writeString(iter246)
+      for kiter230,viter231 in self.groups.items():
+        oprot.writeString(kiter230)
+        oprot.writeSetBegin(TType.STRING, len(viter231))
+        for iter232 in viter231:
+          oprot.writeString(iter232)
         oprot.writeSetEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
@@ -10459,11 +9709,11 @@ class splitRangeByTablets_result:
       if fid == 0:
         if ftype == TType.SET:
           self.success = set()
-          (_etype250, _size247) = iprot.readSetBegin()
-          for _i251 in xrange(_size247):
-            _elem252 = Range()
-            _elem252.read(iprot)
-            self.success.add(_elem252)
+          (_etype236, _size233) = iprot.readSetBegin()
+          for _i237 in xrange(_size233):
+            _elem238 = Range()
+            _elem238.read(iprot)
+            self.success.add(_elem238)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
@@ -10498,8 +9748,8 @@ class splitRangeByTablets_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.SET, 0)
       oprot.writeSetBegin(TType.STRUCT, len(self.success))
-      for iter253 in self.success:
-        iter253.write(oprot)
+      for iter239 in self.success:
+        iter239.write(oprot)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     if self.ouch1 is not None:
@@ -10748,11 +9998,11 @@ class tableIdMap_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype255, _vtype256, _size254 ) = iprot.readMapBegin() 
-          for _i258 in xrange(_size254):
-            _key259 = iprot.readString();
-            _val260 = iprot.readString();
-            self.success[_key259] = _val260
+          (_ktype241, _vtype242, _size240 ) = iprot.readMapBegin() 
+          for _i244 in xrange(_size240):
+            _key245 = iprot.readString();
+            _val246 = iprot.readString();
+            self.success[_key245] = _val246
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -10769,156 +10019,10 @@ class tableIdMap_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.success))
-      for kiter261,viter262 in self.success.items():
-        oprot.writeString(kiter261)
-        oprot.writeString(viter262)
+      for kiter247,viter248 in self.success.items():
+        oprot.writeString(kiter247)
+        oprot.writeString(viter248)
       oprot.writeMapEnd()
-      oprot.writeFieldEnd()
-    oprot.writeFieldStop()
-    oprot.writeStructEnd()
-
-  def validate(self):
-    return
-
-
-  def __repr__(self):
-    L = ['%s=%r' % (key, value)
-      for key, value in self.__dict__.iteritems()]
-    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-  def __eq__(self, other):
-    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-  def __ne__(self, other):
-    return not (self == other)
-
-class pingTabletServer_args:
-  """
-  Attributes:
-   - login
-   - tserver
-  """
-
-  thrift_spec = (
-    None, # 0
-    (1, TType.STRING, 'login', None, None, ), # 1
-    (2, TType.STRING, 'tserver', None, None, ), # 2
-  )
-
-  def __init__(self, login=None, tserver=None,):
-    self.login = login
-    self.tserver = tserver
-
-  def read(self, iprot):
-    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
-      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
-      return
-    iprot.readStructBegin()
-    while True:
-      (fname, ftype, fid) = iprot.readFieldBegin()
-      if ftype == TType.STOP:
-        break
-      if fid == 1:
-        if ftype == TType.STRING:
-          self.login = iprot.readString();
-        else:
-          iprot.skip(ftype)
-      elif fid == 2:
-        if ftype == TType.STRING:
-          self.tserver = iprot.readString();
-        else:
-          iprot.skip(ftype)
-      else:
-        iprot.skip(ftype)
-      iprot.readFieldEnd()
-    iprot.readStructEnd()
-
-  def write(self, oprot):
-    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
-      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
-      return
-    oprot.writeStructBegin('pingTabletServer_args')
-    if self.login is not None:
-      oprot.writeFieldBegin('login', TType.STRING, 1)
-      oprot.writeString(self.login)
-      oprot.writeFieldEnd()
-    if self.tserver is not None:
-      oprot.writeFieldBegin('tserver', TType.STRING, 2)
-      oprot.writeString(self.tserver)
-      oprot.writeFieldEnd()
-    oprot.writeFieldStop()
-    oprot.writeStructEnd()
-
-  def validate(self):
-    return
-
-
-  def __repr__(self):
-    L = ['%s=%r' % (key, value)
-      for key, value in self.__dict__.iteritems()]
-    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-  def __eq__(self, other):
-    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-  def __ne__(self, other):
-    return not (self == other)
-
-class pingTabletServer_result:
-  """
-  Attributes:
-   - ouch1
-   - ouch2
-  """
-
-  thrift_spec = (
-    None, # 0
-    (1, TType.STRUCT, 'ouch1', (AccumuloException, AccumuloException.thrift_spec), None, ), # 1
-    (2, TType.STRUCT, 'ouch2', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 2
-  )
-
-  def __init__(self, ouch1=None, ouch2=None,):
-    self.ouch1 = ouch1
-    self.ouch2 = ouch2
-
-  def read(self, iprot):
-    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
-      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
-      return
-    iprot.readStructBegin()
-    while True:
-      (fname, ftype, fid) = iprot.readFieldBegin()
-      if ftype == TType.STOP:
-        break
-      if fid == 1:
-        if ftype == TType.STRUCT:
-          self.ouch1 = AccumuloException()
-          self.ouch1.read(iprot)
-        else:
-          iprot.skip(ftype)
-      elif fid == 2:
-        if ftype == TType.STRUCT:
-          self.ouch2 = AccumuloSecurityException()
-          self.ouch2.read(iprot)
-        else:
-          iprot.skip(ftype)
-      else:
-        iprot.skip(ftype)
-      iprot.readFieldEnd()
-    iprot.readStructEnd()
-
-  def write(self, oprot):
-    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
-      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
-      return
-    oprot.writeStructBegin('pingTabletServer_result')
-    if self.ouch1 is not None:
-      oprot.writeFieldBegin('ouch1', TType.STRUCT, 1)
-      self.ouch1.write(oprot)
-      oprot.writeFieldEnd()
-    if self.ouch2 is not None:
-      oprot.writeFieldBegin('ouch2', TType.STRUCT, 2)
-      self.ouch2.write(oprot)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -11041,11 +10145,11 @@ class getActiveScans_result:
       if fid == 0:
         if ftype == TType.LIST:
           self.success = []
-          (_etype266, _size263) = iprot.readListBegin()
-          for _i267 in xrange(_size263):
-            _elem268 = ActiveScan()
-            _elem268.read(iprot)
-            self.success.append(_elem268)
+          (_etype252, _size249) = iprot.readListBegin()
+          for _i253 in xrange(_size249):
+            _elem254 = ActiveScan()
+            _elem254.read(iprot)
+            self.success.append(_elem254)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -11074,174 +10178,8 @@ class getActiveScans_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.LIST, 0)
       oprot.writeListBegin(TType.STRUCT, len(self.success))
-      for iter269 in self.success:
-        iter269.write(oprot)
-      oprot.writeListEnd()
-      oprot.writeFieldEnd()
-    if self.ouch1 is not None:
-      oprot.writeFieldBegin('ouch1', TType.STRUCT, 1)
-      self.ouch1.write(oprot)
-      oprot.writeFieldEnd()
-    if self.ouch2 is not None:
-      oprot.writeFieldBegin('ouch2', TType.STRUCT, 2)
-      self.ouch2.write(oprot)
-      oprot.writeFieldEnd()
-    oprot.writeFieldStop()
-    oprot.writeStructEnd()
-
-  def validate(self):
-    return
-
-
-  def __repr__(self):
-    L = ['%s=%r' % (key, value)
-      for key, value in self.__dict__.iteritems()]
-    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-  def __eq__(self, other):
-    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-  def __ne__(self, other):
-    return not (self == other)
-
-class getActiveCompactions_args:
-  """
-  Attributes:
-   - login
-   - tserver
-  """
-
-  thrift_spec = (
-    None, # 0
-    (1, TType.STRING, 'login', None, None, ), # 1
-    (2, TType.STRING, 'tserver', None, None, ), # 2
-  )
-
-  def __init__(self, login=None, tserver=None,):
-    self.login = login
-    self.tserver = tserver
-
-  def read(self, iprot):
-    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
-      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
-      return
-    iprot.readStructBegin()
-    while True:
-      (fname, ftype, fid) = iprot.readFieldBegin()
-      if ftype == TType.STOP:
-        break
-      if fid == 1:
-        if ftype == TType.STRING:
-          self.login = iprot.readString();
-        else:
-          iprot.skip(ftype)
-      elif fid == 2:
-        if ftype == TType.STRING:
-          self.tserver = iprot.readString();
-        else:
-          iprot.skip(ftype)
-      else:
-        iprot.skip(ftype)
-      iprot.readFieldEnd()
-    iprot.readStructEnd()
-
-  def write(self, oprot):
-    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
-      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
-      return
-    oprot.writeStructBegin('getActiveCompactions_args')
-    if self.login is not None:
-      oprot.writeFieldBegin('login', TType.STRING, 1)
-      oprot.writeString(self.login)
-      oprot.writeFieldEnd()
-    if self.tserver is not None:
-      oprot.writeFieldBegin('tserver', TType.STRING, 2)
-      oprot.writeString(self.tserver)
-      oprot.writeFieldEnd()
-    oprot.writeFieldStop()
-    oprot.writeStructEnd()
-
-  def validate(self):
-    return
-
-
-  def __repr__(self):
-    L = ['%s=%r' % (key, value)
-      for key, value in self.__dict__.iteritems()]
-    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-  def __eq__(self, other):
-    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-  def __ne__(self, other):
-    return not (self == other)
-
-class getActiveCompactions_result:
-  """
-  Attributes:
-   - success
-   - ouch1
-   - ouch2
-  """
-
-  thrift_spec = (
-    (0, TType.LIST, 'success', (TType.STRUCT,(ActiveCompaction, ActiveCompaction.thrift_spec)), None, ), # 0
-    (1, TType.STRUCT, 'ouch1', (AccumuloException, AccumuloException.thrift_spec), None, ), # 1
-    (2, TType.STRUCT, 'ouch2', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 2
-  )
-
-  def __init__(self, success=None, ouch1=None, ouch2=None,):
-    self.success = success
-    self.ouch1 = ouch1
-    self.ouch2 = ouch2
-
-  def read(self, iprot):
-    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
-      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
-      return
-    iprot.readStructBegin()
-    while True:
-      (fname, ftype, fid) = iprot.readFieldBegin()
-      if ftype == TType.STOP:
-        break
-      if fid == 0:
-        if ftype == TType.LIST:
-          self.success = []
-          (_etype273, _size270) = iprot.readListBegin()
-          for _i274 in xrange(_size270):
-            _elem275 = ActiveCompaction()
-            _elem275.read(iprot)
-            self.success.append(_elem275)
-          iprot.readListEnd()
-        else:
-          iprot.skip(ftype)
-      elif fid == 1:
-        if ftype == TType.STRUCT:
-          self.ouch1 = AccumuloException()
-          self.ouch1.read(iprot)
-        else:
-          iprot.skip(ftype)
-      elif fid == 2:
-        if ftype == TType.STRUCT:
-          self.ouch2 = AccumuloSecurityException()
-          self.ouch2.read(iprot)
-        else:
-          iprot.skip(ftype)
-      else:
-        iprot.skip(ftype)
-      iprot.readFieldEnd()
-    iprot.readStructEnd()
-
-  def write(self, oprot):
-    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
-      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
-      return
-    oprot.writeStructBegin('getActiveCompactions_result')
-    if self.success is not None:
-      oprot.writeFieldBegin('success', TType.LIST, 0)
-      oprot.writeListBegin(TType.STRUCT, len(self.success))
-      for iter276 in self.success:
-        iter276.write(oprot)
+      for iter255 in self.success:
+        iter255.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.ouch1 is not None:
@@ -11361,11 +10299,11 @@ class getSiteConfiguration_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype278, _vtype279, _size277 ) = iprot.readMapBegin() 
-          for _i281 in xrange(_size277):
-            _key282 = iprot.readString();
-            _val283 = iprot.readString();
-            self.success[_key282] = _val283
+          (_ktype257, _vtype258, _size256 ) = iprot.readMapBegin() 
+          for _i260 in xrange(_size256):
+            _key261 = iprot.readString();
+            _val262 = iprot.readString();
+            self.success[_key261] = _val262
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -11394,9 +10332,9 @@ class getSiteConfiguration_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.success))
-      for kiter284,viter285 in self.success.items():
-        oprot.writeString(kiter284)
-        oprot.writeString(viter285)
+      for kiter263,viter264 in self.success.items():
+        oprot.writeString(kiter263)
+        oprot.writeString(viter264)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.ouch1 is not None:
@@ -11516,11 +10454,11 @@ class getSystemConfiguration_result:
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype287, _vtype288, _size286 ) = iprot.readMapBegin() 
-          for _i290 in xrange(_size286):
-            _key291 = iprot.readString();
-            _val292 = iprot.readString();
-            self.success[_key291] = _val292
+          (_ktype266, _vtype267, _size265 ) = iprot.readMapBegin() 
+          for _i269 in xrange(_size265):
+            _key270 = iprot.readString();
+            _val271 = iprot.readString();
+            self.success[_key270] = _val271
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -11549,9 +10487,9 @@ class getSystemConfiguration_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.MAP, 0)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.success))
-      for kiter293,viter294 in self.success.items():
-        oprot.writeString(kiter293)
-        oprot.writeString(viter294)
+      for kiter272,viter273 in self.success.items():
+        oprot.writeString(kiter272)
+        oprot.writeString(viter273)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.ouch1 is not None:
@@ -11665,10 +10603,10 @@ class getTabletServers_result:
       if fid == 0:
         if ftype == TType.LIST:
           self.success = []
-          (_etype298, _size295) = iprot.readListBegin()
-          for _i299 in xrange(_size295):
-            _elem300 = iprot.readString();
-            self.success.append(_elem300)
+          (_etype277, _size274) = iprot.readListBegin()
+          for _i278 in xrange(_size274):
+            _elem279 = iprot.readString();
+            self.success.append(_elem279)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -11685,8 +10623,8 @@ class getTabletServers_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.LIST, 0)
       oprot.writeListBegin(TType.STRING, len(self.success))
-      for iter301 in self.success:
-        oprot.writeString(iter301)
+      for iter280 in self.success:
+        oprot.writeString(iter280)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -12222,11 +11160,11 @@ class authenticateUser_args:
       elif fid == 3:
         if ftype == TType.MAP:
           self.properties = {}
-          (_ktype303, _vtype304, _size302 ) = iprot.readMapBegin() 
-          for _i306 in xrange(_size302):
-            _key307 = iprot.readString();
-            _val308 = iprot.readString();
-            self.properties[_key307] = _val308
+          (_ktype282, _vtype283, _size281 ) = iprot.readMapBegin() 
+          for _i285 in xrange(_size281):
+            _key286 = iprot.readString();
+            _val287 = iprot.readString();
+            self.properties[_key286] = _val287
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -12251,9 +11189,9 @@ class authenticateUser_args:
     if self.properties is not None:
       oprot.writeFieldBegin('properties', TType.MAP, 3)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.properties))
-      for kiter309,viter310 in self.properties.items():
-        oprot.writeString(kiter309)
-        oprot.writeString(viter310)
+      for kiter288,viter289 in self.properties.items():
+        oprot.writeString(kiter288)
+        oprot.writeString(viter289)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -12401,10 +11339,10 @@ class changeUserAuthorizations_args:
       elif fid == 3:
         if ftype == TType.SET:
           self.authorizations = set()
-          (_etype314, _size311) = iprot.readSetBegin()
-          for _i315 in xrange(_size311):
-            _elem316 = iprot.readString();
-            self.authorizations.add(_elem316)
+          (_etype293, _size290) = iprot.readSetBegin()
+          for _i294 in xrange(_size290):
+            _elem295 = iprot.readString();
+            self.authorizations.add(_elem295)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
@@ -12429,8 +11367,8 @@ class changeUserAuthorizations_args:
     if self.authorizations is not None:
       oprot.writeFieldBegin('authorizations', TType.SET, 3)
       oprot.writeSetBegin(TType.STRING, len(self.authorizations))
-      for iter317 in self.authorizations:
-        oprot.writeString(iter317)
+      for iter296 in self.authorizations:
+        oprot.writeString(iter296)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -13090,10 +12028,10 @@ class getUserAuthorizations_result:
       if fid == 0:
         if ftype == TType.LIST:
           self.success = []
-          (_etype321, _size318) = iprot.readListBegin()
-          for _i322 in xrange(_size318):
-            _elem323 = iprot.readString();
-            self.success.append(_elem323)
+          (_etype300, _size297) = iprot.readListBegin()
+          for _i301 in xrange(_size297):
+            _elem302 = iprot.readString();
+            self.success.append(_elem302)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -13122,8 +12060,8 @@ class getUserAuthorizations_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.LIST, 0)
       oprot.writeListBegin(TType.STRING, len(self.success))
-      for iter324 in self.success:
-        oprot.writeString(iter324)
+      for iter303 in self.success:
+        oprot.writeString(iter303)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.ouch1 is not None:
@@ -13411,17 +12349,20 @@ class grantTablePermission_result:
   Attributes:
    - ouch1
    - ouch2
+   - ouch3
   """
 
   thrift_spec = (
     None, # 0
     (1, TType.STRUCT, 'ouch1', (AccumuloException, AccumuloException.thrift_spec), None, ), # 1
     (2, TType.STRUCT, 'ouch2', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 2
+    (3, TType.STRUCT, 'ouch3', (TableNotFoundException, TableNotFoundException.thrift_spec), None, ), # 3
   )
 
-  def __init__(self, ouch1=None, ouch2=None,):
+  def __init__(self, ouch1=None, ouch2=None, ouch3=None,):
     self.ouch1 = ouch1
     self.ouch2 = ouch2
+    self.ouch3 = ouch3
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -13444,6 +12385,12 @@ class grantTablePermission_result:
           self.ouch2.read(iprot)
         else:
           iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.STRUCT:
+          self.ouch3 = TableNotFoundException()
+          self.ouch3.read(iprot)
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -13461,6 +12408,10 @@ class grantTablePermission_result:
     if self.ouch2 is not None:
       oprot.writeFieldBegin('ouch2', TType.STRUCT, 2)
       self.ouch2.write(oprot)
+      oprot.writeFieldEnd()
+    if self.ouch3 is not None:
+      oprot.writeFieldBegin('ouch3', TType.STRUCT, 3)
+      self.ouch3.write(oprot)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -13896,18 +12847,21 @@ class listLocalUsers_result:
    - success
    - ouch1
    - ouch2
+   - ouch3
   """
 
   thrift_spec = (
     (0, TType.SET, 'success', (TType.STRING,None), None, ), # 0
     (1, TType.STRUCT, 'ouch1', (AccumuloException, AccumuloException.thrift_spec), None, ), # 1
     (2, TType.STRUCT, 'ouch2', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 2
+    (3, TType.STRUCT, 'ouch3', (TableNotFoundException, TableNotFoundException.thrift_spec), None, ), # 3
   )
 
-  def __init__(self, success=None, ouch1=None, ouch2=None,):
+  def __init__(self, success=None, ouch1=None, ouch2=None, ouch3=None,):
     self.success = success
     self.ouch1 = ouch1
     self.ouch2 = ouch2
+    self.ouch3 = ouch3
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -13921,10 +12875,10 @@ class listLocalUsers_result:
       if fid == 0:
         if ftype == TType.SET:
           self.success = set()
-          (_etype328, _size325) = iprot.readSetBegin()
-          for _i329 in xrange(_size325):
-            _elem330 = iprot.readString();
-            self.success.add(_elem330)
+          (_etype307, _size304) = iprot.readSetBegin()
+          for _i308 in xrange(_size304):
+            _elem309 = iprot.readString();
+            self.success.add(_elem309)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
@@ -13940,6 +12894,12 @@ class listLocalUsers_result:
           self.ouch2.read(iprot)
         else:
           iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.STRUCT:
+          self.ouch3 = TableNotFoundException()
+          self.ouch3.read(iprot)
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -13953,8 +12913,8 @@ class listLocalUsers_result:
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.SET, 0)
       oprot.writeSetBegin(TType.STRING, len(self.success))
-      for iter331 in self.success:
-        oprot.writeString(iter331)
+      for iter310 in self.success:
+        oprot.writeString(iter310)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     if self.ouch1 is not None:
@@ -13964,6 +12924,10 @@ class listLocalUsers_result:
     if self.ouch2 is not None:
       oprot.writeFieldBegin('ouch2', TType.STRUCT, 2)
       self.ouch2.write(oprot)
+      oprot.writeFieldEnd()
+    if self.ouch3 is not None:
+      oprot.writeFieldBegin('ouch3', TType.STRUCT, 3)
+      self.ouch3.write(oprot)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -14242,17 +13206,20 @@ class revokeTablePermission_result:
   Attributes:
    - ouch1
    - ouch2
+   - ouch3
   """
 
   thrift_spec = (
     None, # 0
     (1, TType.STRUCT, 'ouch1', (AccumuloException, AccumuloException.thrift_spec), None, ), # 1
     (2, TType.STRUCT, 'ouch2', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 2
+    (3, TType.STRUCT, 'ouch3', (TableNotFoundException, TableNotFoundException.thrift_spec), None, ), # 3
   )
 
-  def __init__(self, ouch1=None, ouch2=None,):
+  def __init__(self, ouch1=None, ouch2=None, ouch3=None,):
     self.ouch1 = ouch1
     self.ouch2 = ouch2
+    self.ouch3 = ouch3
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -14275,6 +13242,12 @@ class revokeTablePermission_result:
           self.ouch2.read(iprot)
         else:
           iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.STRUCT:
+          self.ouch3 = TableNotFoundException()
+          self.ouch3.read(iprot)
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -14292,6 +13265,10 @@ class revokeTablePermission_result:
     if self.ouch2 is not None:
       oprot.writeFieldBegin('ouch2', TType.STRUCT, 2)
       self.ouch2.write(oprot)
+      oprot.writeFieldEnd()
+    if self.ouch3 is not None:
+      oprot.writeFieldBegin('ouch3', TType.STRUCT, 3)
+      self.ouch3.write(oprot)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -14402,18 +13379,21 @@ class createBatchScanner_result:
    - success
    - ouch1
    - ouch2
+   - ouch3
   """
 
   thrift_spec = (
     (0, TType.STRING, 'success', None, None, ), # 0
     (1, TType.STRUCT, 'ouch1', (AccumuloException, AccumuloException.thrift_spec), None, ), # 1
     (2, TType.STRUCT, 'ouch2', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 2
+    (3, TType.STRUCT, 'ouch3', (TableNotFoundException, TableNotFoundException.thrift_spec), None, ), # 3
   )
 
-  def __init__(self, success=None, ouch1=None, ouch2=None,):
+  def __init__(self, success=None, ouch1=None, ouch2=None, ouch3=None,):
     self.success = success
     self.ouch1 = ouch1
     self.ouch2 = ouch2
+    self.ouch3 = ouch3
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -14441,6 +13421,12 @@ class createBatchScanner_result:
           self.ouch2.read(iprot)
         else:
           iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.STRUCT:
+          self.ouch3 = TableNotFoundException()
+          self.ouch3.read(iprot)
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -14462,6 +13448,10 @@ class createBatchScanner_result:
     if self.ouch2 is not None:
       oprot.writeFieldBegin('ouch2', TType.STRUCT, 2)
       self.ouch2.write(oprot)
+      oprot.writeFieldEnd()
+    if self.ouch3 is not None:
+      oprot.writeFieldBegin('ouch3', TType.STRUCT, 3)
+      self.ouch3.write(oprot)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -14572,18 +13562,21 @@ class createScanner_result:
    - success
    - ouch1
    - ouch2
+   - ouch3
   """
 
   thrift_spec = (
     (0, TType.STRING, 'success', None, None, ), # 0
     (1, TType.STRUCT, 'ouch1', (AccumuloException, AccumuloException.thrift_spec), None, ), # 1
     (2, TType.STRUCT, 'ouch2', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 2
+    (3, TType.STRUCT, 'ouch3', (TableNotFoundException, TableNotFoundException.thrift_spec), None, ), # 3
   )
 
-  def __init__(self, success=None, ouch1=None, ouch2=None,):
+  def __init__(self, success=None, ouch1=None, ouch2=None, ouch3=None,):
     self.success = success
     self.ouch1 = ouch1
     self.ouch2 = ouch2
+    self.ouch3 = ouch3
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -14611,6 +13604,12 @@ class createScanner_result:
           self.ouch2.read(iprot)
         else:
           iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.STRUCT:
+          self.ouch3 = TableNotFoundException()
+          self.ouch3.read(iprot)
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -14632,6 +13631,10 @@ class createScanner_result:
     if self.ouch2 is not None:
       oprot.writeFieldBegin('ouch2', TType.STRUCT, 2)
       self.ouch2.write(oprot)
+      oprot.writeFieldEnd()
+    if self.ouch3 is not None:
+      oprot.writeFieldBegin('ouch3', TType.STRUCT, 3)
+      self.ouch3.write(oprot)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -15276,17 +14279,17 @@ class updateAndFlush_args:
       elif fid == 3:
         if ftype == TType.MAP:
           self.cells = {}
-          (_ktype333, _vtype334, _size332 ) = iprot.readMapBegin() 
-          for _i336 in xrange(_size332):
-            _key337 = iprot.readString();
-            _val338 = []
-            (_etype342, _size339) = iprot.readListBegin()
-            for _i343 in xrange(_size339):
-              _elem344 = ColumnUpdate()
-              _elem344.read(iprot)
-              _val338.append(_elem344)
+          (_ktype312, _vtype313, _size311 ) = iprot.readMapBegin() 
+          for _i315 in xrange(_size311):
+            _key316 = iprot.readString();
+            _val317 = []
+            (_etype321, _size318) = iprot.readListBegin()
+            for _i322 in xrange(_size318):
+              _elem323 = ColumnUpdate()
+              _elem323.read(iprot)
+              _val317.append(_elem323)
             iprot.readListEnd()
-            self.cells[_key337] = _val338
+            self.cells[_key316] = _val317
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -15311,11 +14314,11 @@ class updateAndFlush_args:
     if self.cells is not None:
       oprot.writeFieldBegin('cells', TType.MAP, 3)
       oprot.writeMapBegin(TType.STRING, TType.LIST, len(self.cells))
-      for kiter345,viter346 in self.cells.items():
-        oprot.writeString(kiter345)
-        oprot.writeListBegin(TType.STRUCT, len(viter346))
-        for iter347 in viter346:
-          iter347.write(oprot)
+      for kiter324,viter325 in self.cells.items():
+        oprot.writeString(kiter324)
+        oprot.writeListBegin(TType.STRUCT, len(viter325))
+        for iter326 in viter325:
+          iter326.write(oprot)
         oprot.writeListEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
@@ -15342,17 +14345,23 @@ class updateAndFlush_result:
   Attributes:
    - outch1
    - ouch2
+   - ouch3
+   - ouch4
   """
 
   thrift_spec = (
     None, # 0
     (1, TType.STRUCT, 'outch1', (AccumuloException, AccumuloException.thrift_spec), None, ), # 1
     (2, TType.STRUCT, 'ouch2', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 2
+    (3, TType.STRUCT, 'ouch3', (TableNotFoundException, TableNotFoundException.thrift_spec), None, ), # 3
+    (4, TType.STRUCT, 'ouch4', (MutationsRejectedException, MutationsRejectedException.thrift_spec), None, ), # 4
   )
 
-  def __init__(self, outch1=None, ouch2=None,):
+  def __init__(self, outch1=None, ouch2=None, ouch3=None, ouch4=None,):
     self.outch1 = outch1
     self.ouch2 = ouch2
+    self.ouch3 = ouch3
+    self.ouch4 = ouch4
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -15375,6 +14384,18 @@ class updateAndFlush_result:
           self.ouch2.read(iprot)
         else:
           iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.STRUCT:
+          self.ouch3 = TableNotFoundException()
+          self.ouch3.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.STRUCT:
+          self.ouch4 = MutationsRejectedException()
+          self.ouch4.read(iprot)
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -15392,6 +14413,14 @@ class updateAndFlush_result:
     if self.ouch2 is not None:
       oprot.writeFieldBegin('ouch2', TType.STRUCT, 2)
       self.ouch2.write(oprot)
+      oprot.writeFieldEnd()
+    if self.ouch3 is not None:
+      oprot.writeFieldBegin('ouch3', TType.STRUCT, 3)
+      self.ouch3.write(oprot)
+      oprot.writeFieldEnd()
+    if self.ouch4 is not None:
+      oprot.writeFieldBegin('ouch4', TType.STRUCT, 4)
+      self.ouch4.write(oprot)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -15502,18 +14531,21 @@ class createWriter_result:
    - success
    - outch1
    - ouch2
+   - ouch3
   """
 
   thrift_spec = (
     (0, TType.STRING, 'success', None, None, ), # 0
     (1, TType.STRUCT, 'outch1', (AccumuloException, AccumuloException.thrift_spec), None, ), # 1
     (2, TType.STRUCT, 'ouch2', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 2
+    (3, TType.STRUCT, 'ouch3', (TableNotFoundException, TableNotFoundException.thrift_spec), None, ), # 3
   )
 
-  def __init__(self, success=None, outch1=None, ouch2=None,):
+  def __init__(self, success=None, outch1=None, ouch2=None, ouch3=None,):
     self.success = success
     self.outch1 = outch1
     self.ouch2 = ouch2
+    self.ouch3 = ouch3
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -15541,6 +14573,12 @@ class createWriter_result:
           self.ouch2.read(iprot)
         else:
           iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.STRUCT:
+          self.ouch3 = TableNotFoundException()
+          self.ouch3.read(iprot)
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -15562,6 +14600,10 @@ class createWriter_result:
     if self.ouch2 is not None:
       oprot.writeFieldBegin('ouch2', TType.STRUCT, 2)
       self.ouch2.write(oprot)
+      oprot.writeFieldEnd()
+    if self.ouch3 is not None:
+      oprot.writeFieldBegin('ouch3', TType.STRUCT, 3)
+      self.ouch3.write(oprot)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -15615,17 +14657,17 @@ class update_args:
       elif fid == 2:
         if ftype == TType.MAP:
           self.cells = {}
-          (_ktype349, _vtype350, _size348 ) = iprot.readMapBegin() 
-          for _i352 in xrange(_size348):
-            _key353 = iprot.readString();
-            _val354 = []
-            (_etype358, _size355) = iprot.readListBegin()
-            for _i359 in xrange(_size355):
-              _elem360 = ColumnUpdate()
-              _elem360.read(iprot)
-              _val354.append(_elem360)
+          (_ktype328, _vtype329, _size327 ) = iprot.readMapBegin() 
+          for _i331 in xrange(_size327):
+            _key332 = iprot.readString();
+            _val333 = []
+            (_etype337, _size334) = iprot.readListBegin()
+            for _i338 in xrange(_size334):
+              _elem339 = ColumnUpdate()
+              _elem339.read(iprot)
+              _val333.append(_elem339)
             iprot.readListEnd()
-            self.cells[_key353] = _val354
+            self.cells[_key332] = _val333
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -15646,11 +14688,11 @@ class update_args:
     if self.cells is not None:
       oprot.writeFieldBegin('cells', TType.MAP, 2)
       oprot.writeMapBegin(TType.STRING, TType.LIST, len(self.cells))
-      for kiter361,viter362 in self.cells.items():
-        oprot.writeString(kiter361)
-        oprot.writeListBegin(TType.STRUCT, len(viter362))
-        for iter363 in viter362:
-          iter363.write(oprot)
+      for kiter340,viter341 in self.cells.items():
+        oprot.writeString(kiter340)
+        oprot.writeListBegin(TType.STRUCT, len(viter341))
+        for iter342 in viter341:
+          iter342.write(oprot)
         oprot.writeListEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
@@ -15742,7 +14784,7 @@ class flush_result:
   thrift_spec = (
     None, # 0
     (1, TType.STRUCT, 'ouch1', (UnknownWriter, UnknownWriter.thrift_spec), None, ), # 1
-    (2, TType.STRUCT, 'ouch2', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 2
+    (2, TType.STRUCT, 'ouch2', (MutationsRejectedException, MutationsRejectedException.thrift_spec), None, ), # 2
   )
 
   def __init__(self, ouch1=None, ouch2=None,):
@@ -15766,7 +14808,7 @@ class flush_result:
           iprot.skip(ftype)
       elif fid == 2:
         if ftype == TType.STRUCT:
-          self.ouch2 = AccumuloSecurityException()
+          self.ouch2 = MutationsRejectedException()
           self.ouch2.read(iprot)
         else:
           iprot.skip(ftype)
@@ -15876,7 +14918,7 @@ class closeWriter_result:
   thrift_spec = (
     None, # 0
     (1, TType.STRUCT, 'ouch1', (UnknownWriter, UnknownWriter.thrift_spec), None, ), # 1
-    (2, TType.STRUCT, 'ouch2', (AccumuloSecurityException, AccumuloSecurityException.thrift_spec), None, ), # 2
+    (2, TType.STRUCT, 'ouch2', (MutationsRejectedException, MutationsRejectedException.thrift_spec), None, ), # 2
   )
 
   def __init__(self, ouch1=None, ouch2=None,):
@@ -15900,7 +14942,7 @@ class closeWriter_result:
           iprot.skip(ftype)
       elif fid == 2:
         if ftype == TType.STRUCT:
-          self.ouch2 = AccumuloSecurityException()
+          self.ouch2 = MutationsRejectedException()
           self.ouch2.read(iprot)
         else:
           iprot.skip(ftype)
