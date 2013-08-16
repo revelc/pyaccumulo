@@ -101,6 +101,31 @@ class GrepIterator(BaseIterator):
             "negate": str(self.negate).lower()
         }
 
+class RowDeletingIterator(BaseIterator):
+    """
+    An iterator for deleting whole rows. After setting this iterator up for
+    your table, to delete a row insert a row with empty column family, empty
+    column qualifier, empty column visibility, and a value of DEL_ROW. Do not
+    use empty columns for anything else when using this iterator. When using
+    this iterator the locality group containing the row deletes will always be
+    read. The locality group containing the empty column family will contain
+    row deletes. Always reading this locality group can have an impact on
+    performance. For example assume there are two locality groups, one
+    containing large images and one containing small metadata about the images.
+    If row deletes are in the same locality group as the images, then this will
+    significantly slow down scans and major compactions that are only reading
+    the metadata locality group. Therefore, you would want to put the empty
+    column family in the locality group that contains the metadata. Another
+    option is to put the empty column in its own locality group. Which is best
+    depends on your data.
+    """
+    def __init__(self, name="RowDeletingIterator", priority=10):
+        classname="org.apache.accumulo.core.iterators.user.RowDeletingIterator"
+        super(RowDeletingIterator, self).__init__(name=name,
+                                                  priority=priority,
+                                                  classname=classname)
+
+
 class RegExFilter(BaseIterator):
     """docstring for RegExFilter"""
     def __init__(self, row_regex=None, cf_regex=None, cq_regex=None, val_regex=None, or_fields=False, match_substring=False, priority=10, name="RegExFilter"):
