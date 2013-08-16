@@ -116,6 +116,11 @@ class GrepIteratorTest(unittest.TestCase):
             }, 
             a.properties)
 
+class RowDeletingIteratorTest(unittest.TestCase):
+    def test_iterator(self):
+        i = RowDeletingIterator()
+        self.assertEquals("org.apache.accumulo.core.iterators.user.RowDeletingIterator", i.classname)
+
 class RegExFilterTest(unittest.TestCase):
     def test_iterator(self):
         i = RegExFilter()
