@@ -23,7 +23,7 @@ except ImportError:
 
 from distutils.cmd import Command
 
-__version__ = "1.5.0-SNAPSHOT"
+import version
 
 long_description = """pyaccumulo is a python client library for Apache Accumulo that uses the Accumulo Thrift Proxy"""
 
@@ -98,7 +98,7 @@ Please ask in the user forums for help.
 
 setup(
       name = 'pyaccumulo',
-      version = __version__,
+      version = version.get_git_version(),
       author = 'Jason Trost',
       author_email = 'jason.trost AT gmail.com',
       maintainer = 'Jason Trost',
