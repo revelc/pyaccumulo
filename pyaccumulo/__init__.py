@@ -210,4 +210,7 @@ class Accumulo(object):
     
     def create_batch_writer(self, table, max_memory=10*1024, latency_ms=30*1000, timeout_ms=5*1000, threads=10):
         return BatchWriter(self, table, max_memory, latency_ms, timeout_ms, threads)
+    
+    def delete_rows(self, table, srow, erow):
+        self.client.deleteRows(self.login, table, srow, erow)
 
