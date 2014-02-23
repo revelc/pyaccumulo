@@ -146,6 +146,15 @@ setup(
                   'pyaccumulo.proxy'
                   ],
       install_requires = ['thrift'],
+      tests_require = [
+        'ipdb',
+        'pytest',
+        'pytest-cov',
+        'pytest-xdist',
+        'pytest-timeout',
+        'pytest-capturelog',
+        'pytest-incremental',
+        ],
       py_modules=['ez_setup'],
       cmdclass=dict(
         doc = doc, 
