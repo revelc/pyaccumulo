@@ -3,6 +3,7 @@
 #
 
 import os
+import sys
 
 try:
     import subprocess
@@ -96,9 +97,11 @@ Please ask in the user forums for help.
 """
 
 
+VERSION, HASH = version.get_git_version()
+
 setup(
       name = 'pyaccumulo',
-      version = version.get_git_version(),
+      version = VERSION,
       author = 'Jason Trost',
       author_email = 'jason.trost AT gmail.com',
       maintainer = 'Jason Trost',
@@ -113,7 +116,10 @@ setup(
                   ],
       install_requires = ['thrift'],
       py_modules=['ez_setup'],
-      cmdclass={"doc": doc, "rpm": rpm},
+      cmdclass=dict(
+        doc = doc, 
+        rpm = rpm,
+        ),
       classifiers=[
           'Development Status :: 3 - Alpha',
           'Intended Audience :: Developers',
@@ -126,5 +132,5 @@ setup(
           'Programming Language :: Python :: 2.7',
           'Programming Language :: Python :: 2 :: Only',
           'Topic :: Software Development :: Libraries :: Python Modules'
-          ]
+          ],
       )
