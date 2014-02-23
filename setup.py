@@ -96,6 +96,37 @@ class doc(Command):
 Please ask in the user forums for help.
 """
 
+class PyTest(Command):
+    '''run py.test'''
+
+    description = 'runs py.test to execute all tests'
+
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        cmd = ['pip', 'install']
+        if self.distribution.install_requires:
+            cmd.extend(self.distribution.install_requires)
+        if self.distribution.tests_require:
+            cmd.extend(self.distribution.tests_require)
+        errno = subprocess.call(cmd)
+        if errno:
+            raise SystemExit(errno)
+
+        # reload sys.path for any new libraries installed
+        import site
+        site.main()
+        print sys.path
+        # use pytest to run tests
+        pytest = __import__('pytest')
+        exitcode = pytest.main(['--cov', 'pyaccumulo', '--cov-report', 'term', '-vvs', 'tests'])
+        sys.exit(exitcode)
 
 VERSION, HASH = version.get_git_version()
 
@@ -119,6 +150,7 @@ setup(
       cmdclass=dict(
         doc = doc, 
         rpm = rpm,
+        test = PyTest,
         ),
       classifiers=[
           'Development Status :: 3 - Alpha',

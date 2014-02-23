@@ -10,8 +10,8 @@ build: clean
 install: build
 	pip install .
 
-test:
-	run_tests.sh
+test: clean
+	python setup.py test
 
 register:
 	python setup.py sdist bdist_egg upload -r pypi
