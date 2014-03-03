@@ -147,6 +147,8 @@ setup(
                   ],
       install_requires = ['thrift'],
       tests_require = [
+        'mock',
+        'coverage',
         'ipdb',
         'pytest',
         'pytest-cov',
