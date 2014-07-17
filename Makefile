@@ -1,23 +1,17 @@
+.PHONY : clean build install test register check
 
 clean:
+	python setup.py clean --all
 	rm -rf build dist src/*.egg-info/
 
-.PHONY : build
 build: clean
 	python setup.py build
 
-build_eggs: build
-	python setup.py bdist_egg
-
-build_packages: build_eggs
-	python setup.py bdist_rpm
-
 install: build
-	python setup.py clean --all
-	python setup.py install
+	pip install .
 
-test:
-	python runtests.py src
+test: clean
+	python setup.py test
 
 register:
 	python setup.py sdist bdist_egg upload -r pypi
