@@ -45,6 +45,25 @@ def following_array(val):
     else:
         return None
 
+def following_key(key):
+    """
+    Returns the key immediately following the input key - based on the Java implementation found in
+    org.apache.accumulo.core.data.Key, function followingKey(PartialKey part)
+    :param key: the key to be followed
+    :return: a key that immediately follows the input key
+    """
+    if key.timestamp is not None:
+        key.timestamp -= 1
+    elif key.colVisibility is not None:
+        key.colVisibility = following_array(key.colVisibility)
+    elif key.colQualifier is not None:
+        key.colQualifier = following_array(key.colQualifier)
+    elif key.colFamily is not None:
+        key.colFamily = following_array(key.colFamily)
+    elif key.row is not None:
+        key.row = following_array(key.row)
+    return key
+
 class Mutation(object):
     def __init__(self, row):
         super(Mutation, self).__init__()
@@ -83,12 +102,12 @@ class Range(object):
         if self.srow:
             r.start = Key(row=self.srow, colFamily=self.scf, colQualifier=self.scq, colVisibility=self.scv, timestamp=self.sts)
             if not self.sinclude:
-                r.start.row = following_array(r.start.row)
+                r.start = following_key(r.start)
             
         if self.erow:
             r.stop = Key(row=self.erow, colFamily=self.ecf, colQualifier=self.ecq, colVisibility=self.ecv, timestamp=self.ets)
             if self.einclude:
-                r.stop.row = following_array(r.stop.row)
+                r.stop = following_key(r.stop)
         
         return r
 
