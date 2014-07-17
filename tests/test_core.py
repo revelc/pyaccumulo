@@ -178,10 +178,45 @@ class RangeTest(unittest.TestCase):
         rng = r.to_range()
         self.assertEquals(Key(row="r01\0"), rng.start)
 
+        r = Range(srow="r01", scf="cf1", erow="r02", ecf="cf2")
+        rng = r.to_range()
+        self.assertEquals(Key(row="r01", colFamily="cf1"), rng.start)
+        self.assertEquals(Key(row="r02", colFamily="cf2\0"), rng.stop)
+
+        r = Range(srow="r01", scf="cf1", scq="cq1", erow="r02", ecf="cf2", ecq="cq2")
+        rng = r.to_range()
+        self.assertEquals(Key(row="r01", colFamily="cf1", colQualifier="cq1"), rng.start)
+        self.assertEquals(Key(row="r02", colFamily="cf2", colQualifier="cq2\0"), rng.stop)
+
+        r = Range(srow="r01", scf="cf1", scq="cq1", erow="r02", ecf="cf2", ecq="cq2", scv="xy", ecv="zx")
+        rng = r.to_range()
+        self.assertEquals(Key(row="r01", colFamily="cf1", colQualifier="cq1", colVisibility="xy"), rng.start)
+        self.assertEquals(Key(row="r02", colFamily="cf2", colQualifier="cq2", colVisibility="zx\0"), rng.stop)
+
         r = Range(srow="r01", scf="cf1", scq="cq1", erow="r02", ecf="cf2", ecq="cq2", sts=100, ets=101, scv="xy", ecv="zx")
         rng = r.to_range()
         self.assertEquals(Key(row="r01", colFamily="cf1", colQualifier="cq1", timestamp=100, colVisibility="xy"), rng.start)
-        self.assertEquals(Key(row="r02\0", colFamily="cf2", colQualifier="cq2", timestamp=101, colVisibility="zx"), rng.stop)
+        self.assertEquals(Key(row="r02", colFamily="cf2", colQualifier="cq2", timestamp=100, colVisibility="zx"), rng.stop)
+
+        r = Range(srow="r01", scf="cf1", erow="r02", ecf="cf2", sinclude=False, einclude=False)
+        rng = r.to_range()
+        self.assertEquals(Key(row="r01", colFamily="cf1\0"), rng.start)
+        self.assertEquals(Key(row="r02", colFamily="cf2"), rng.stop)
+
+        r = Range(srow="r01", scf="cf1", scq="cq1", erow="r02", ecf="cf2", ecq="cq2", sinclude=False, einclude=False)
+        rng = r.to_range()
+        self.assertEquals(Key(row="r01", colFamily="cf1", colQualifier="cq1\0"), rng.start)
+        self.assertEquals(Key(row="r02", colFamily="cf2", colQualifier="cq2"), rng.stop)
+
+        r = Range(srow="r01", scf="cf1", scq="cq1", erow="r02", ecf="cf2", ecq="cq2", scv="xy", ecv="zx", sinclude=False, einclude=False)
+        rng = r.to_range()
+        self.assertEquals(Key(row="r01", colFamily="cf1", colQualifier="cq1", colVisibility="xy\0"), rng.start)
+        self.assertEquals(Key(row="r02", colFamily="cf2", colQualifier="cq2", colVisibility="zx"), rng.stop)
+
+        r = Range(srow="r01", scf="cf1", scq="cq1", erow="r02", ecf="cf2", ecq="cq2", sts=100, ets=101, scv="xy", ecv="zx", sinclude=False, einclude=False)
+        rng = r.to_range()
+        self.assertEquals(Key(row="r01", colFamily="cf1", colQualifier="cq1", timestamp=99, colVisibility="xy"), rng.start)
+        self.assertEquals(Key(row="r02", colFamily="cf2", colQualifier="cq2", timestamp=101, colVisibility="zx"), rng.stop)
 
 class MutationTest(unittest.TestCase):
     def test_mutation(self):
