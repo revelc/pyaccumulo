@@ -12,10 +12,10 @@
 # To use this script, simply import it your setup.py file, and use the
 # results of get_git_version() as your package version:
 #
-# from version import *
+# from version import get_git_version
 #
 # setup(
-#     version=get_git_version(),
+#     version=get_git_version()[0],
 #     .
 #     .
 #     .
@@ -40,11 +40,12 @@ from subprocess import Popen, PIPE
  
  
 def call_git_describe(abbrev=4):
-    line = None
+    describe_line = None
     p = None
     try:
         p = Popen(['git', 'describe', '--abbrev=%d' % abbrev],
-                  stdout=PIPE, stderr=PIPE)
+                  stdout=PIPE, stderr=PIPE, 
+                  cwd=os.path.dirname(os.path.abspath(__file__)))
         p.stderr.close()
         describe_line = p.stdout.readlines()[0].strip()
 
@@ -60,16 +61,16 @@ def call_git_describe(abbrev=4):
 
         else:
             ver, rel, source_hash = parts
-            ver_x, ver_y, ver_z = ver.split('.')
+            ver_x, ver_y1, ver_y2, ver_z = ver.split('.')
             ## go to the next z-increment or "patch" release
             ver_z = int(ver_z) + 1
-            version = '%s.%s.%d.dev%s' % (ver_x, ver_y, ver_z, rel)
+            version = '%s.%s.%s.%d.dev%s' % (ver_x, ver_y1, ver_y2, ver_z, rel)
 
         return version, source_hash
  
     except Exception, exc:
         '''
-        sys.stderr.write('line: %r\n' % line)
+        sys.stderr.write('describe_line: %r\n' % describe_line)
         sys.stderr.write(traceback.format_exc(exc))
         try:
             sys.stderr.write('p.stderr.read()=%s\n' % p.stderr.read())
@@ -124,7 +125,7 @@ def get_git_version(abbrev=4):
  
     if version is None:
         # raise ValueError("Cannot find the version number!")
-        version = '0.1.0'
+        version = '0.0.0'
         source_hash = ''
  
     # If the current version is different from what's in the
