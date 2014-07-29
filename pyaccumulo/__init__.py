@@ -233,3 +233,74 @@ class Accumulo(object):
     def delete_rows(self, table, srow, erow):
         self.client.deleteRows(self.login, table, srow, erow)
 
+    def attach_iterator(self, table, setting, scopes):
+        self.client.attachIterator(self.login, table, setting, scopes)
+
+    def remove_iterator(self, table, iterator, scopes):
+        self.client.removeIterator(self.login, table, iterator, scopes)
+
+    def following_key(self, key, part):
+        return self.client.getFollowing(key, part)
+
+    def get_max_row(self, table, auths=None, srow=None, sinclude=None, erow=None, einclude=None):
+        return self.client.getMaxRow(self.login, table, auths, srow, sinclude, erow, einclude)
+
+    def add_mutations_and_flush(self, table, muts):
+        """
+        Add mutations to a table without the need to create and manage a batch writer.
+        """
+        if not isinstance(muts, list) and not isinstance(muts, tuple):
+            muts = [muts]
+        cells = {}
+        for mut in muts:
+            cells.setdefault(mut.row, []).extend(mut.updates)
+        self.client.updateAndFlush(self.login, table, cells)
+
+    def create_user(self, user, password):
+        self.client.createLocalUser(self.login, user, password)
+
+    def drop_user(self, user):
+        self.client.dropLocalUser(self.login, user)
+
+    def list_users(self):
+        return self.client.listLocalUsers(self.login)
+
+    def set_user_authorizations(self, user, auths):
+        self.client.changeUserAuthorizations(self.login, user, auths)
+
+    def get_user_authorizations(self, user):
+        return self.client.getUserAuthorizations(self.login, user)
+
+    def grant_system_permission(self, user, perm):
+        self.client.grantSystemPermission(self.login, user, perm)
+
+    def revoke_system_permission(self, user, perm):
+        self.client.revokeSystemPermission(self.login, user, perm)
+
+    def has_system_permission(self, user, perm):
+        return self.client.hasSystemPermission(self.login, user, perm)
+
+    def grant_table_permission(self, user, table, perm):
+        self.client.grantTablePermission(self.login, user, table, perm)
+
+    def revoke_table_permission(self, user, table, perm):
+        self.client.revokeTablePermission(self.login, user, table, perm)
+
+    def has_table_permission(self, user, table, perm):
+        return self.client.hasTablePermission(self.login, user, table, perm)
+
+    def add_splits(self, table, splits):
+        self.client.addSplits(self.login, table, splits)
+
+    def add_constraint(self, table, class_name):
+        return self.client.addConstraint(self.login, table, class_name)
+
+    def list_constraints(self, table):
+        return self.client.listConstraints(self.login, table)
+
+    def remove_constraint(self, table, constraint):
+        """
+        :param table: table name
+        :param constraint: the constraint number as returned by list_constraints
+        """
+        self.client.removeConstraint(self.login, table, constraint)
