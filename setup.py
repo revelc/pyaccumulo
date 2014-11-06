@@ -137,6 +137,7 @@ setup(
       author_email = 'jason.trost AT gmail.com',
       maintainer = 'Jason Trost',
       maintainer_email = 'jason.trost AT gmail.com',
+      license = 'License :: OSI Approved :: Apache Software License',
       description = 'Python client library for Apache Accumulo',
       long_description = long_description,
       url = 'https://github.com/accumulo/pyaccumulo',
