@@ -98,7 +98,7 @@ class Range(object):
 
     @staticmethod
     def followingPrefix(prefix):
-        """Returns a String that sorts just after all Texts beginning with a prefix"""
+        """Returns a String that sorts just after all Strings beginning with a prefix"""
         prefixBytes = array('B', prefix)
 
         changeIndex = len(prefixBytes) - 1
