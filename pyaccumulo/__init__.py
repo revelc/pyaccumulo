@@ -98,6 +98,7 @@ class Range(object):
 
     @staticmethod
     def followingPrefix(prefix):
+        """Returns a String that sorts just after all Texts beginning with a prefix"""
         prefixBytes = array('B', prefix)
 
         changeIndex = len(prefixBytes) - 1
@@ -111,6 +112,7 @@ class Range(object):
 
     @staticmethod
     def prefix(rowPrefix):
+        """Returns a Range that covers all rows beggining with a prefix"""
         fp = Range.followingPrefix(rowPrefix)
         return Range(srow=rowPrefix, sinclude=True, erow=fp, einclude=False)
 
