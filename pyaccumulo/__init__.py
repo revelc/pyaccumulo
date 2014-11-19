@@ -112,7 +112,7 @@ class Range(object):
 
     @staticmethod
     def prefix(rowPrefix):
-        """Returns a Range that covers all rows beggining with a prefix"""
+        """Returns a Range that covers all rows beginning with a prefix"""
         fp = Range.followingPrefix(rowPrefix)
         return Range(srow=rowPrefix, sinclude=True, erow=fp, einclude=False)
 
