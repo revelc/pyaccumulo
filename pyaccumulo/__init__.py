@@ -45,6 +45,25 @@ def following_array(val):
     else:
         return None
 
+def following_key(key):
+    """
+    Returns the key immediately following the input key - based on the Java implementation found in
+    org.apache.accumulo.core.data.Key, function followingKey(PartialKey part)
+    :param key: the key to be followed
+    :return: a key that immediately follows the input key
+    """
+    if key.timestamp is not None:
+        key.timestamp -= 1
+    elif key.colVisibility is not None:
+        key.colVisibility = following_array(key.colVisibility)
+    elif key.colQualifier is not None:
+        key.colQualifier = following_array(key.colQualifier)
+    elif key.colFamily is not None:
+        key.colFamily = following_array(key.colFamily)
+    elif key.row is not None:
+        key.row = following_array(key.row)
+    return key
+
 class Mutation(object):
     def __init__(self, row):
         super(Mutation, self).__init__()
@@ -83,12 +102,12 @@ class Range(object):
         if self.srow:
             r.start = Key(row=self.srow, colFamily=self.scf, colQualifier=self.scq, colVisibility=self.scv, timestamp=self.sts)
             if not self.sinclude:
-                r.start.row = following_array(r.start.row)
+                r.start = following_key(r.start)
             
         if self.erow:
             r.stop = Key(row=self.erow, colFamily=self.ecf, colQualifier=self.ecq, colVisibility=self.ecv, timestamp=self.ets)
             if self.einclude:
-                r.stop.row = following_array(r.stop.row)
+                r.stop = following_key(r.stop)
         
         return r
 
@@ -210,4 +229,78 @@ class Accumulo(object):
     
     def create_batch_writer(self, table, max_memory=10*1024, latency_ms=30*1000, timeout_ms=5*1000, threads=10):
         return BatchWriter(self, table, max_memory, latency_ms, timeout_ms, threads)
+    
+    def delete_rows(self, table, srow, erow):
+        self.client.deleteRows(self.login, table, srow, erow)
 
+    def attach_iterator(self, table, setting, scopes):
+        self.client.attachIterator(self.login, table, setting, scopes)
+
+    def remove_iterator(self, table, iterator, scopes):
+        self.client.removeIterator(self.login, table, iterator, scopes)
+
+    def following_key(self, key, part):
+        return self.client.getFollowing(key, part)
+
+    def get_max_row(self, table, auths=None, srow=None, sinclude=None, erow=None, einclude=None):
+        return self.client.getMaxRow(self.login, table, auths, srow, sinclude, erow, einclude)
+
+    def add_mutations_and_flush(self, table, muts):
+        """
+        Add mutations to a table without the need to create and manage a batch writer.
+        """
+        if not isinstance(muts, list) and not isinstance(muts, tuple):
+            muts = [muts]
+        cells = {}
+        for mut in muts:
+            cells.setdefault(mut.row, []).extend(mut.updates)
+        self.client.updateAndFlush(self.login, table, cells)
+
+    def create_user(self, user, password):
+        self.client.createLocalUser(self.login, user, password)
+
+    def drop_user(self, user):
+        self.client.dropLocalUser(self.login, user)
+
+    def list_users(self):
+        return self.client.listLocalUsers(self.login)
+
+    def set_user_authorizations(self, user, auths):
+        self.client.changeUserAuthorizations(self.login, user, auths)
+
+    def get_user_authorizations(self, user):
+        return self.client.getUserAuthorizations(self.login, user)
+
+    def grant_system_permission(self, user, perm):
+        self.client.grantSystemPermission(self.login, user, perm)
+
+    def revoke_system_permission(self, user, perm):
+        self.client.revokeSystemPermission(self.login, user, perm)
+
+    def has_system_permission(self, user, perm):
+        return self.client.hasSystemPermission(self.login, user, perm)
+
+    def grant_table_permission(self, user, table, perm):
+        self.client.grantTablePermission(self.login, user, table, perm)
+
+    def revoke_table_permission(self, user, table, perm):
+        self.client.revokeTablePermission(self.login, user, table, perm)
+
+    def has_table_permission(self, user, table, perm):
+        return self.client.hasTablePermission(self.login, user, table, perm)
+
+    def add_splits(self, table, splits):
+        self.client.addSplits(self.login, table, splits)
+
+    def add_constraint(self, table, class_name):
+        return self.client.addConstraint(self.login, table, class_name)
+
+    def list_constraints(self, table):
+        return self.client.listConstraints(self.login, table)
+
+    def remove_constraint(self, table, constraint):
+        """
+        :param table: table name
+        :param constraint: the constraint number as returned by list_constraints
+        """
+        self.client.removeConstraint(self.login, table, constraint)

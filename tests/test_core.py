@@ -19,8 +19,16 @@ import unittest
 import pyaccumulo
 from pyaccumulo import *
 from mock import Mock
+from pyaccumulo.proxy.ttypes import IteratorScope, PartialKey, SystemPermission, TablePermission
+
 
 class AccumuloTest(unittest.TestCase):
+    def _get_mock_connection(self):
+        conn = Accumulo(_connect=False)
+        conn.client = Mock()
+        conn.login = "Login"
+        return conn
+
     def test_get_scan_columns(self):
         self.assertEquals(None, pyaccumulo._get_scan_columns([]))
         self.assertEquals([ ScanColumn(colFamily="cf", colQualifier="cq") ], pyaccumulo._get_scan_columns([ ["cf", "cq"]]))
@@ -31,9 +39,7 @@ class AccumuloTest(unittest.TestCase):
         self.assertEquals(None, pyaccumulo.following_array(None))
 
     def test_list_tables(self):
-        conn = Accumulo(_connect=False)
-        conn.client = Mock()
-        conn.login = "Login"
+        conn = self._get_mock_connection()
         conn.client.listTables = Mock()
         conn.client.listTables.return_value = set(["t1", "t2", "t3"])
 
@@ -43,9 +49,7 @@ class AccumuloTest(unittest.TestCase):
 
 
     def test_table_exists(self):
-        conn = Accumulo(_connect=False)
-        conn.client = Mock()
-        conn.login = "Login"
+        conn = self._get_mock_connection()
         conn.client.tableExists = Mock()
         conn.client.tableExists.return_value = True
 
@@ -55,9 +59,7 @@ class AccumuloTest(unittest.TestCase):
 
 
     def test_create_table(self):
-        conn = Accumulo(_connect=False)
-        conn.client = Mock()
-        conn.login = "Login"
+        conn = self._get_mock_connection()
         conn.client.createTable = Mock()
         conn.client.createTable.return_value = True
 
@@ -65,17 +67,13 @@ class AccumuloTest(unittest.TestCase):
         conn.client.createTable.assert_called_with("Login", "mytable", True, TimeType.MILLIS)        
 
     def test_delete_table(self):
-        conn = Accumulo(_connect=False)
-        conn.client = Mock()
-        conn.login = "Login"
+        conn = self._get_mock_connection()
         conn.client.deleteTable = Mock()
         conn.delete_table("mytable")
         conn.client.deleteTable.assert_called_with("Login", "mytable")
 
     def test_rename_table(self):
-        conn = Accumulo(_connect=False)
-        conn.client = Mock()
-        conn.login = "Login"
+        conn = self._get_mock_connection()
         conn.client.renameTable = Mock()
         conn.rename_table("mytable", "newtable")
         conn.client.renameTable.assert_called_with("Login", "mytable", "newtable")
@@ -157,6 +155,142 @@ class AccumuloTest(unittest.TestCase):
         conn.close()
         conn.transport.close.assert_called_with()
 
+    def test_attach_iterator(self):
+        conn = self._get_mock_connection()
+        conn.client.attachIterator = Mock()
+        iter_setting = IteratorSetting(name="i1")
+        scopes = {IteratorScope.MAJC, IteratorScope.MINC, IteratorScope.SCAN}
+        conn.attach_iterator("mytable", iter_setting, scopes)
+        conn.client.attachIterator.assert_called_with("Login", "mytable", iter_setting, scopes)
+
+    def test_remove_iterator(self):
+        conn = self._get_mock_connection()
+        conn.client.removeIterator = Mock()
+        scopes = {IteratorScope.MAJC, IteratorScope.MINC, IteratorScope.SCAN}
+        conn.remove_iterator("mytable", "i1", scopes)
+        conn.client.removeIterator.assert_called_with("Login", "mytable", "i1", scopes)
+
+    def test_following_key(self):
+        conn = self._get_mock_connection()
+        key = Key(row="aabbcc", colFamily="cf", colQualifier="cq")
+        conn.client.getFollowing = Mock(return_value=following_key(key))
+        fkey = conn.following_key(key, PartialKey.ROW_COLFAM_COLQUAL_COLVIS)
+        conn.client.getFollowing.assert_called_with(key, PartialKey.ROW_COLFAM_COLQUAL_COLVIS)
+        self.assertEqual(fkey, Key(row="aabbcc", colFamily="cf", colQualifier="cq\0"))
+
+    def test_get_max_row(self):
+        conn = self._get_mock_connection()
+        conn.client.getMaxRow = Mock(return_value="aabe")
+        row = conn.get_max_row("mytable", auths=["auth1", "auth2"], srow="aabb", sinclude=True, erow="bbaa", einclude=False)
+        conn.client.getMaxRow.assert_called_with("Login", "mytable", ["auth1", "auth2"], "aabb", True, "bbaa", False)
+        self.assertEqual(row, "aabe")
+
+    def test_add_mutations_and_flush(self):
+        conn = self._get_mock_connection()
+        conn.client.updateAndFlush = Mock()
+        muts = [Mutation("aabb"), Mutation("bbaa")]
+        conn.add_mutations_and_flush("mytable", muts)
+        conn.client.updateAndFlush.assert_called_with("Login", "mytable", {'aabb': [], 'bbaa': []})
+        conn.add_mutations_and_flush("mytable", Mutation("ccdd"))
+        conn.client.updateAndFlush.assert_called_with("Login", "mytable", {'ccdd': []})
+
+    def test_create_user(self):
+        conn = self._get_mock_connection()
+        conn.createLocalUser = Mock()
+        conn.create_user("user", "password")
+        conn.client.createLocalUser.assert_called_with("Login", "user", "password")
+
+    def test_drop_user(self):
+        conn = self._get_mock_connection()
+        conn.client.dropLocalUser = Mock()
+        conn.drop_user("user")
+        conn.client.dropLocalUser.assert_called_with("Login", "user")
+
+    def test_list_users(self):
+        conn = self._get_mock_connection()
+        conn.client.listLocalUsers = Mock(return_value=["user1", "user2"])
+        users = conn.list_users()
+        conn.client.listLocalUsers.assert_called_with("Login")
+        self.assertEqual(users, ["user1", "user2"])
+
+    def test_set_user_authorizations(self):
+        conn = self._get_mock_connection()
+        conn.client.changeUserAuthorizations = Mock()
+        conn.set_user_authorizations("user", ["auth1", "auth2"])
+        conn.client.changeUserAuthorizations.assert_called_with("Login", "user", ["auth1", "auth2"])
+
+    def test_get_user_authorizations(self):
+        conn = self._get_mock_connection()
+        conn.client.getUserAuthorizations = Mock(return_value=["auth1", "auth2"])
+        auths = conn.get_user_authorizations("user1")
+        conn.client.getUserAuthorizations.assert_called_with("Login", "user1")
+        self.assertEqual(auths, ["auth1", "auth2"])
+
+    def test_grant_system_permission(self):
+        conn = self._get_mock_connection()
+        conn.client.grantSystemPermission = Mock()
+        conn.grant_system_permission("user1", SystemPermission.CREATE_TABLE)
+        conn.client.grantSystemPermission.assert_called_with("Login", "user1", SystemPermission.CREATE_TABLE)
+
+    def test_revoke_system_permission(self):
+        conn = self._get_mock_connection()
+        conn.client.revokeSystemPermission = Mock()
+        conn.revoke_system_permission("user1", SystemPermission.DROP_USER)
+        conn.client.revokeSystemPermission.assert_called_with("Login", "user1", SystemPermission.DROP_USER)
+
+    def test_has_system_permission(self):
+        conn = self._get_mock_connection()
+        conn.client.hasSystemPermission = Mock(return_value=True)
+        has_perm = conn.has_system_permission("user1", SystemPermission.SYSTEM)
+        conn.client.hasSystemPermission.assert_called_with("Login", "user1", SystemPermission.SYSTEM)
+        self.assertTrue(has_perm)
+
+    def test_grant_table_permission(self):
+        conn = self._get_mock_connection()
+        conn.client.grantTablePermission = Mock()
+        conn.grant_table_permission("user1", "mytable", TablePermission.BULK_IMPORT)
+        conn.client.grantTablePermission.assert_called_with("Login", "user1", "mytable", TablePermission.BULK_IMPORT)
+
+    def test_revoke_table_permission(self):
+        conn = self._get_mock_connection()
+        conn.client.revokeTablePermission = Mock()
+        conn.revoke_table_permission("user1", "mytable", TablePermission.DROP_TABLE)
+        conn.client.revokeTablePermission.assert_called_with("Login", "user1", "mytable", TablePermission.DROP_TABLE)
+
+    def test_has_table_permission(self):
+        conn = self._get_mock_connection()
+        conn.client.hasTablePermission = Mock(return_value=False)
+        has_perm = conn.has_table_permission("user1", "mytable", TablePermission.GRANT)
+        conn.client.hasTablePermission.assert_called_with("Login", "user1", "mytable", TablePermission.GRANT)
+        self.assertFalse(has_perm)
+
+    def test_add_splits(self):
+        conn = self._get_mock_connection()
+        conn.client.addSplits = Mock()
+        conn.add_splits("mytable", ["aa", "bb", "cc"])
+        conn.client.addSplits.assert_called_with("Login", "mytable", ["aa", "bb", "cc"])
+
+    def test_add_constraints(self):
+        conn = self._get_mock_connection()
+        conn.client.addConstraint = Mock(return_value=True)
+        ret_val = conn.add_constraint("mytable", "org.apache.accumulo.examples.simple.constraints.MaxMutationSize")
+        conn.client.addConstraint.assert_called_with(
+            "Login", "mytable", "org.apache.accumulo.examples.simple.constraints.MaxMutationSize")
+        self.assertTrue(ret_val)
+
+    def test_list_constraints(self):
+        conn = self._get_mock_connection()
+        conn.client.listConstraints = Mock(return_value={"c1": 1, "c2": 1})
+        constraints = conn.list_constraints("mytable")
+        conn.client.listConstraints.assert_called_with("Login", "mytable")
+        self.assertEqual(constraints, {"c1": 1, "c2": 1})
+
+    def test_remove_constraint(self):
+        conn = self._get_mock_connection()
+        conn.client.removeConstraint = Mock()
+        conn.remove_constraint("mytable", 1)
+        conn.client.removeConstraint.assert_called_with("Login", "mytable", 1)
+
 class RangeTest(unittest.TestCase):
     def test_to_range(self):
 
@@ -178,10 +312,45 @@ class RangeTest(unittest.TestCase):
         rng = r.to_range()
         self.assertEquals(Key(row="r01\0"), rng.start)
 
+        r = Range(srow="r01", scf="cf1", erow="r02", ecf="cf2")
+        rng = r.to_range()
+        self.assertEquals(Key(row="r01", colFamily="cf1"), rng.start)
+        self.assertEquals(Key(row="r02", colFamily="cf2\0"), rng.stop)
+
+        r = Range(srow="r01", scf="cf1", scq="cq1", erow="r02", ecf="cf2", ecq="cq2")
+        rng = r.to_range()
+        self.assertEquals(Key(row="r01", colFamily="cf1", colQualifier="cq1"), rng.start)
+        self.assertEquals(Key(row="r02", colFamily="cf2", colQualifier="cq2\0"), rng.stop)
+
+        r = Range(srow="r01", scf="cf1", scq="cq1", erow="r02", ecf="cf2", ecq="cq2", scv="xy", ecv="zx")
+        rng = r.to_range()
+        self.assertEquals(Key(row="r01", colFamily="cf1", colQualifier="cq1", colVisibility="xy"), rng.start)
+        self.assertEquals(Key(row="r02", colFamily="cf2", colQualifier="cq2", colVisibility="zx\0"), rng.stop)
+
         r = Range(srow="r01", scf="cf1", scq="cq1", erow="r02", ecf="cf2", ecq="cq2", sts=100, ets=101, scv="xy", ecv="zx")
         rng = r.to_range()
         self.assertEquals(Key(row="r01", colFamily="cf1", colQualifier="cq1", timestamp=100, colVisibility="xy"), rng.start)
-        self.assertEquals(Key(row="r02\0", colFamily="cf2", colQualifier="cq2", timestamp=101, colVisibility="zx"), rng.stop)
+        self.assertEquals(Key(row="r02", colFamily="cf2", colQualifier="cq2", timestamp=100, colVisibility="zx"), rng.stop)
+
+        r = Range(srow="r01", scf="cf1", erow="r02", ecf="cf2", sinclude=False, einclude=False)
+        rng = r.to_range()
+        self.assertEquals(Key(row="r01", colFamily="cf1\0"), rng.start)
+        self.assertEquals(Key(row="r02", colFamily="cf2"), rng.stop)
+
+        r = Range(srow="r01", scf="cf1", scq="cq1", erow="r02", ecf="cf2", ecq="cq2", sinclude=False, einclude=False)
+        rng = r.to_range()
+        self.assertEquals(Key(row="r01", colFamily="cf1", colQualifier="cq1\0"), rng.start)
+        self.assertEquals(Key(row="r02", colFamily="cf2", colQualifier="cq2"), rng.stop)
+
+        r = Range(srow="r01", scf="cf1", scq="cq1", erow="r02", ecf="cf2", ecq="cq2", scv="xy", ecv="zx", sinclude=False, einclude=False)
+        rng = r.to_range()
+        self.assertEquals(Key(row="r01", colFamily="cf1", colQualifier="cq1", colVisibility="xy\0"), rng.start)
+        self.assertEquals(Key(row="r02", colFamily="cf2", colQualifier="cq2", colVisibility="zx"), rng.stop)
+
+        r = Range(srow="r01", scf="cf1", scq="cq1", erow="r02", ecf="cf2", ecq="cq2", sts=100, ets=101, scv="xy", ecv="zx", sinclude=False, einclude=False)
+        rng = r.to_range()
+        self.assertEquals(Key(row="r01", colFamily="cf1", colQualifier="cq1", timestamp=99, colVisibility="xy"), rng.start)
+        self.assertEquals(Key(row="r02", colFamily="cf2", colQualifier="cq2", timestamp=101, colVisibility="zx"), rng.stop)
 
 class MutationTest(unittest.TestCase):
     def test_mutation(self):
