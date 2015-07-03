@@ -2,3 +2,7 @@
 .coverage
 htmlcov/
 .idea
+RELEASE-VERSION
+dist/
+distribute-*
+pyaccumulo.egg-info/
