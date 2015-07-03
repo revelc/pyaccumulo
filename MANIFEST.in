@@ -4,7 +4,6 @@ include README.md
 include settings.py
 include requirements.txt
 include LICENSE
-include ez_setup.py
 include rpm-install-script.sh
 recursive-include tests *.py
 recursive-include examples *.py

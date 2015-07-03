@@ -4,25 +4,11 @@
 
 import os
 import sys
+import fnmatch
+import subprocess
 
-try:
-    import subprocess
-    has_subprocess = True
-except:
-    has_subprocess = False
-
-try:
-    from ez_setup import use_setuptools
-    use_setuptools()
-except ImportError:
-    pass
-
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
-
-from distutils.cmd import Command
+from distutils.core import Command
+from setuptools import setup, find_packages
 
 import version
 
@@ -158,7 +144,6 @@ setup(
         'pytest-capturelog',
         'pytest-incremental',
         ],
-      py_modules=['ez_setup'],
       cmdclass=dict(
         doc = doc, 
         rpm = rpm,

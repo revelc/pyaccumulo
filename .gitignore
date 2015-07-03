@@ -4,5 +4,6 @@ htmlcov/
 .idea
 RELEASE-VERSION
 dist/
+build/
 distribute-*
 pyaccumulo.egg-info/
