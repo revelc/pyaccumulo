@@ -105,7 +105,7 @@ class Range(object):
         while (changeIndex >= 0 and prefixBytes[changeIndex] == 0xff ):
             changeIndex = changeIndex - 1;
         if(changeIndex < 0):
-           return None;
+            return None
         newBytes = array('B', prefix[0:changeIndex + 1])
         newBytes[changeIndex] = newBytes[changeIndex] + 1
         return newBytes.tostring()
