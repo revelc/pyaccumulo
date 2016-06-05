@@ -26,6 +26,8 @@ import pyaccumulo.proxy.ttypes
 from collections import namedtuple
 from pyaccumulo.iterators import BaseIterator
 
+from array import array
+
 Cell = namedtuple("Cell", "row cf cq cv ts val")
 
 def _get_scan_columns(cols):
@@ -93,6 +95,27 @@ class Range(object):
         self.ecv = ecv
         self.ets = ets
         self.einclude = einclude
+
+    @staticmethod
+    def followingPrefix(prefix):
+        """Returns a String that sorts just after all Strings beginning with a prefix"""
+        prefixBytes = array('B', prefix)
+
+        changeIndex = len(prefixBytes) - 1
+        while (changeIndex >= 0 and prefixBytes[changeIndex] == 0xff ):
+            changeIndex = changeIndex - 1;
+        if(changeIndex < 0):
+           return None;
+        newBytes = array('B', prefix[0:changeIndex + 1])
+        newBytes[changeIndex] = newBytes[changeIndex] + 1
+        return newBytes.tostring()
+
+    @staticmethod
+    def prefix(rowPrefix):
+        """Returns a Range that covers all rows beginning with a prefix"""
+        fp = Range.followingPrefix(rowPrefix)
+        return Range(srow=rowPrefix, sinclude=True, erow=fp, einclude=False)
+
 
     def to_range(self):
         r = proxy.ttypes.Range()
