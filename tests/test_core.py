@@ -352,6 +352,44 @@ class RangeTest(unittest.TestCase):
         self.assertEquals(Key(row="r01", colFamily="cf1", colQualifier="cq1", timestamp=99, colVisibility="xy"), rng.start)
         self.assertEquals(Key(row="r02", colFamily="cf2", colQualifier="cq2", timestamp=101, colVisibility="zx"), rng.stop)
 
+    def test_followingPrefix(self):
+        self.assertIsNone(Range.followingPrefix(''))
+
+        self.assertIsNone(Range.followingPrefix('\xff'))
+
+        self.assertEquals('\xff',  Range.followingPrefix('\xfe'))
+
+        self.assertEquals('\x44\xff\xfe\x08',
+            Range.followingPrefix('\x44\xff\xfe\x07\xff\xff'))
+
+    def test_prefix(self):
+        r = Range.prefix('')
+        self.assertIsInstance(r, Range)
+        self.assertEquals('', r.srow)
+        self.assertTrue(r.sinclude)
+        self.assertIsNone(r.erow)
+
+        r = Range.prefix('\xff')
+        self.assertIsInstance(r, Range)
+        self.assertEquals('\xff', r.srow)
+        self.assertTrue(r.sinclude)
+        self.assertIsNone(r.erow)
+
+        r = Range.prefix('\xfe')
+        self.assertIsInstance(r, Range)
+        self.assertEquals('\xfe', r.srow)
+        self.assertTrue(r.sinclude)
+        self.assertEquals('\xff', r.erow)
+        self.assertFalse(r.einclude)
+
+        r = Range.prefix('\x44\xff\xfe\x07\xff\xff')
+        self.assertIsInstance(r, Range)
+        self.assertEquals('\x44\xff\xfe\x07\xff\xff', r.srow)
+        self.assertTrue(r.sinclude)
+        self.assertEquals('\x44\xff\xfe\x08', r.erow)
+        self.assertFalse(r.einclude)
+
+
 class MutationTest(unittest.TestCase):
     def test_mutation(self):
         m = Mutation("row1")
